@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% import "_macros.html" as m with context %}
+{% block titulo %}Agenda{% endblock %}
+{% block conteudo %}
+<div class="cabecalho-pagina">
+  <h1>Agenda</h1>
+  <a class="botao botao-primario" href="{{ url_for('agendamentos.novo', data=filtros.data or None) }}">+ Novo agendamento</a>
+</div>
+
+<form method="get" class="barra-filtros" aria-label="Filtrar agenda">
+  <div class="campo-compacto">
+    <label for="data">Dia</label>
+    <input id="data" name="data" type="date" value="{{ filtros.data }}">
+  </div>
+  <div class="campo-compacto">
+    <label for="profissional_id">Profissional</label>
+    <select id="profissional_id" name="profissional_id">
+      <option value="">Todos</option>
+      {% for p in profissionais %}
+      <option value="{{ p.id }}" {% if filtros.profissional_id == p.id %}selected{% endif %}>{{ p.nome }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="campo-compacto">
+    <label for="status">Status</label>
+    <select id="status" name="status">
+      <option value="">Todos</option>
+      {% for valor, rotulo in STATUS_AGENDAMENTO.items() %}
+      <option value="{{ valor }}" {% if filtros.status == valor %}selected{% endif %}>{{ rotulo }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="campo-compacto">
+    <label for="periodo">Período (sem dia)</label>
+    <select id="periodo" name="periodo">
+      <option value="proximos">De hoje em diante</option>
+      <option value="todos" {% if filtros.periodo == 'todos' %}selected{% endif %}>Todos, inclusive passados</option>
+    </select>
+  </div>
+  <button type="submit" class="botao botao-secundario">Filtrar</button>
+  <a href="{{ url_for('agendamentos.lista') }}">Limpar</a>
+</form>
+
+{% if filtros.data %}
+<p class="subtitulo">Mostrando o dia <strong>{{ filtros.data[8:10] }}/{{ filtros.data[5:7] }}/{{ filtros.data[0:4] }}</strong>.</p>
+{% endif %}
+
+{% if pagina.items %}
+<div class="tabela-rolagem">
+<table class="tabela">
+  <thead><tr><th>Quando</th><th>Cliente</th><th>Serviço</th><th>Profissional</th><th>Valor</th><th>Status</th><th><span class="visualmente-oculto">Ações</span></th></tr></thead>
+  <tbody>
+  {% for a in pagina.items %}
+    <tr class="{% if a.status == 'cancelado' %}esmaecido{% endif %}">
+      <td data-rotulo="Quando">{{ a.inicio|data }}<br><strong>{{ a.inicio|hora }}–{{ a.fim|hora }}</strong></td>
+      <td data-rotulo="Cliente"><a href="{{ url_for('clientes.detalhe', cliente_id=a.cliente_id) }}">{{ a.cliente.nome }}</a></td>
+      <td data-rotulo="Serviço">{{ a.servico.nome }}</td>
+      <td data-rotulo="Profissional">{{ a.profissional.nome }}</td>
+      <td data-rotulo="Valor">{{ a.preco|moeda }}</td>
+      <td data-rotulo="Status">{{ m.selo_status(a) }}</td>
+      <td class="acoes-linha">
+        {% set voltar = request.full_path %}
+        {% if a.status == 'agendado' %}
+          <a class="botao botao-pequeno botao-secundario" href="{{ url_for('agendamentos.editar', agendamento_id=a.id) }}">Remarcar</a>
+          {{ m.botao_post(url_for('agendamentos.alterar_status', agendamento_id=a.id), 'Concluir', 'botao botao-pequeno', campos={'status': 'concluido', 'voltar_para': voltar}) }}
+          {{ m.botao_post(url_for('agendamentos.alterar_status', agendamento_id=a.id), 'Cancelar', 'botao botao-pequeno botao-perigo-contorno',
+               confirmar='Cancelar o atendimento de ' ~ a.cliente.nome ~ ' em ' ~ (a.inicio|data_hora) ~ '? Você poderá reabrir depois.',
+               campos={'status': 'cancelado', 'voltar_para': voltar}) }}
+        {% elif a.status == 'cancelado' %}
+          {{ m.botao_post(url_for('agendamentos.alterar_status', agendamento_id=a.id), 'Reabrir', 'botao botao-pequeno botao-secundario', campos={'status': 'agendado', 'voltar_para': voltar}) }}
+        {% endif %}
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{{ m.paginacao(pagina, 'agendamentos.lista') }}
+{% else %}
+<p class="vazio">Nenhum agendamento encontrado com esses filtros.
+  <a href="{{ url_for('agendamentos.novo', data=filtros.data or None) }}">Criar agendamento</a>.</p>
+{% endif %}
+{% endblock %}

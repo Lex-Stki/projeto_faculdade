@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% import "_macros.html" as m with context %}
+{% block titulo %}Início{% endblock %}
+{% block conteudo %}
+<div class="cabecalho-pagina">
+  <div>
+    <h1>Olá, {{ g.usuario.nome.split(' ')[0] }}</h1>
+    <p class="subtitulo">Hoje é {{ agora|data }}.</p>
+  </div>
+  <a class="botao botao-primario" href="{{ url_for('agendamentos.novo') }}">+ Novo agendamento</a>
+</div>
+
+{% if sem_cadastros %}
+<section class="cartao destaque">
+  <h2>Primeiros passos</h2>
+  <ol class="passos">
+    <li>Cadastre os <a href="{{ url_for('servicos.novo') }}">serviços</a> oferecidos (nome, duração e preço).</li>
+    <li>Cadastre os <a href="{{ url_for('profissionais.novo') }}">profissionais</a>.</li>
+    <li>Cadastre um <a href="{{ url_for('clientes.novo') }}">cliente</a> e crie o primeiro agendamento.</li>
+  </ol>
+  {% if g.usuario.perfil == 'admin' %}
+  <p>Quer testar rápido? Carregue serviços, profissionais e clientes de exemplo:</p>
+  {{ m.botao_post(url_for('dashboard.dados_exemplo'), 'Carregar dados de exemplo') }}
+  {% endif %}
+</section>
+{% endif %}
+
+<section class="indicadores" aria-label="Resumo do dia">
+  <div class="indicador"><span class="indicador-valor">{{ indicadores.hoje }}</span><span>atendimentos hoje</span></div>
+  <div class="indicador"><span class="indicador-valor">{{ indicadores.pendentes_hoje }}</span><span>ainda a realizar</span></div>
+  <div class="indicador"><span class="indicador-valor">{{ indicadores.receita_hoje|moeda }}</span><span>previsto hoje</span></div>
+  <div class="indicador"><span class="indicador-valor">{{ indicadores.clientes }}</span><span>clientes cadastrados</span></div>
+</section>
+
+<section class="cartao">
+  <h2>Agenda de hoje</h2>
+  {% if de_hoje %}
+  <ul class="linha-tempo">
+    {% for a in de_hoje %}
+    <li class="{% if a.status == 'cancelado' %}esmaecido{% endif %}">
+      <span class="horario">{{ a.inicio|hora }}–{{ a.fim|hora }}</span>
+      <span class="descricao">
+        <strong><a href="{{ url_for('clientes.detalhe', cliente_id=a.cliente_id) }}">{{ a.cliente.nome }}</a></strong>
+        · {{ a.servico.nome }} com {{ a.profissional.nome }}
+      </span>
+      {{ m.selo_status(a) }}
+      {% if a.status == 'agendado' and a.inicio <= agora %}
+        {{ m.botao_post(url_for('agendamentos.alterar_status', agendamento_id=a.id), 'Concluir', 'botao botao-pequeno', campos={'status': 'concluido', 'voltar_para': url_for('dashboard.inicio')}) }}
+      {% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p class="vazio">Nenhum atendimento para hoje. <a href="{{ url_for('agendamentos.novo') }}">Agendar agora</a>.</p>
+  {% endif %}
+</section>
+
+<section class="cartao">
+  <h2>Próximos dias</h2>
+  {% if proximos %}
+  <ul class="linha-tempo">
+    {% for a in proximos %}
+    <li>
+      <span class="horario">{{ a.inicio|data_hora }}</span>
+      <span class="descricao"><strong>{{ a.cliente.nome }}</strong> · {{ a.servico.nome }} com {{ a.profissional.nome }}</span>
+    </li>
+    {% endfor %}
+  </ul>
+  <a href="{{ url_for('agendamentos.lista') }}">Ver agenda completa &rarr;</a>
+  {% else %}
+  <p class="vazio">Nada agendado para os próximos dias.</p>
+  {% endif %}
+</section>
+{% endblock %}

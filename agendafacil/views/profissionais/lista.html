@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% import "_macros.html" as m with context %}
+{% block titulo %}Profissionais{% endblock %}
+{% block conteudo %}
+<div class="cabecalho-pagina">
+  <h1>Profissionais</h1>
+  <a class="botao botao-primario" href="{{ url_for('profissionais.novo') }}">+ Novo profissional</a>
+</div>
+{% if profissionais %}
+<div class="tabela-rolagem">
+<table class="tabela">
+  <thead><tr><th>Nome</th><th>Especialidade</th><th>Situação</th><th><span class="visualmente-oculto">Ações</span></th></tr></thead>
+  <tbody>
+  {% for p in profissionais %}
+    <tr class="{% if not p.ativo %}esmaecido{% endif %}">
+      <td data-rotulo="Nome"><a href="{{ url_for('agendamentos.lista', profissional_id=p.id) }}" title="Ver agenda">{{ p.nome }}</a></td>
+      <td data-rotulo="Especialidade">{{ p.especialidade or '—' }}</td>
+      <td data-rotulo="Situação"><span class="selo {{ 'selo-agendado' if p.ativo else 'selo-cancelado' }}">{{ 'Ativo' if p.ativo else 'Inativo' }}</span></td>
+      <td class="acoes-linha">
+        <a class="botao botao-pequeno botao-secundario" href="{{ url_for('profissionais.editar', profissional_id=p.id) }}">Editar</a>
+        {{ m.botao_post(url_for('profissionais.alternar', profissional_id=p.id), 'Inativar' if p.ativo else 'Reativar', 'botao botao-pequeno botao-secundario') }}
+        {{ m.botao_post(url_for('profissionais.excluir', profissional_id=p.id), 'Excluir', 'botao botao-pequeno botao-perigo-contorno',
+             confirmar='Excluir o profissional “' ~ p.nome ~ '”?') }}
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% else %}
+<p class="vazio">Nenhum profissional cadastrado. <a href="{{ url_for('profissionais.novo') }}">Cadastre o primeiro</a>.</p>
+{% endif %}
+{% endblock %}

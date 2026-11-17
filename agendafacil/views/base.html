@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block titulo %}AgendaFácil{% endblock %} · AgendaFácil</title>
+  <link rel="icon" href="{{ url_for('static', filename='img/icone.svg') }}" type="image/svg+xml">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <a class="pular" href="#conteudo">Pular para o conteúdo</a>
+  <header class="topo">
+    <div class="topo-interno">
+      <a class="marca" href="{{ url_for('dashboard.inicio') }}">
+        <img src="{{ url_for('static', filename='img/icone.svg') }}" alt="" width="28" height="28">
+        AgendaFácil
+      </a>
+      {% if g.usuario %}
+      <button class="menu-botao" type="button" aria-expanded="false" aria-controls="menu" data-menu>Menu</button>
+      <nav id="menu" class="menu" aria-label="Navegação principal">
+        {% set ep = request.endpoint or '' %}
+        <a href="{{ url_for('dashboard.inicio') }}" {% if ep == 'dashboard.inicio' %}aria-current="page"{% endif %}>Início</a>
+        <a href="{{ url_for('agendamentos.lista') }}" {% if ep.startswith('agendamentos.') %}aria-current="page"{% endif %}>Agenda</a>
+        <a href="{{ url_for('clientes.lista') }}" {% if ep.startswith('clientes.') %}aria-current="page"{% endif %}>Clientes</a>
+        <a href="{{ url_for('servicos.lista') }}" {% if ep.startswith('servicos.') %}aria-current="page"{% endif %}>Serviços</a>
+        <a href="{{ url_for('profissionais.lista') }}" {% if ep.startswith('profissionais.') %}aria-current="page"{% endif %}>Profissionais</a>
+        {% if g.usuario.perfil == 'admin' %}
+        <a href="{{ url_for('feedback.lista') }}" {% if ep == 'feedback.lista' %}aria-current="page"{% endif %}>Laudos</a>
+        {% endif %}
+        <form method="post" action="{{ url_for('auth.logout') }}" class="form-sair">
+          <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+          <button type="submit" class="link-botao" title="Sair ({{ g.usuario.email }})">Sair</button>
+        </form>
+      </nav>
+      {% endif %}
+    </div>
+  </header>
+
+  <main id="conteudo" class="conteudo">
+    {% with mensagens = get_flashed_messages(with_categories=true) %}
+      {% if mensagens %}
+      <div class="mensagens" role="status" aria-live="polite">
+        {% for categoria, mensagem in mensagens %}
+        <div class="alerta alerta-{{ categoria }}">
+          <span>{{ mensagem }}</span>
+          <button type="button" class="alerta-fechar" aria-label="Fechar mensagem" data-fechar-alerta>&times;</button>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    {% endwith %}
+    {% block conteudo %}{% endblock %}
+  </main>
+
+  <footer class="rodape">
+    <span>AgendaFácil · Projeto Integrador Transdisciplinar em Engenharia de Software II</span>
+    <a href="{{ url_for('feedback.formulario') }}">Testou o sistema? Envie seu laudo</a>
+  </footer>
+
+  <dialog id="dialogo-confirmar" class="dialogo">
+    <form method="dialog">
+      <h2 id="dialogo-titulo">Confirmar ação</h2>
+      <p id="dialogo-texto"></p>
+      <div class="acoes">
+        <button value="cancelar" class="botao botao-secundario">Voltar</button>
+        <button value="confirmar" class="botao botao-perigo" id="dialogo-ok">Confirmar</button>
+      </div>
+    </form>
+  </dialog>
+  <script src="{{ url_for('static', filename='js/app.js') }}" defer></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% import "_macros.html" as m with context %}
+{% block titulo %}{{ titulo }}{% endblock %}
+{% block conteudo %}
+<nav class="trilha" aria-label="Você está em">
+  <a href="{{ url_for('profissionais.lista') }}">Profissionais</a> › {{ titulo }}
+</nav>
+<section class="cartao cartao-medio">
+  <h1>{{ titulo }}</h1>
+  <form method="post" novalidate data-validar>
+    {{ m.csrf() }}
+    {{ m.campo('nome', 'Nome', dados, obrigatorio=true, attrs='maxlength="100" minlength="2" autofocus') }}
+    {{ m.campo('especialidade', 'Especialidade', dados, ajuda='Opcional. Ex.: Cabeleireira, Barbeiro.', attrs='maxlength="80"') }}
+    <div class="acoes">
+      <a class="botao botao-secundario" href="{{ url_for('profissionais.lista') }}">Cancelar</a>
+      <button type="submit" class="botao botao-primario">Salvar</button>
+    </div>
+  </form>
+</section>
+{% endblock %}

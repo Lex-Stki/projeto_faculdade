@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% import "_macros.html" as m with context %}
+{% block titulo %}Laudo de teste{% endblock %}
+{% block conteudo %}
+<section class="cartao cartao-medio">
+  <h1>Laudo de teste do AgendaFácil</h1>
+  <p class="subtitulo">Obrigado por testar! Use o sistema como se fosse o dono de um salão ou barbearia
+    e depois conte aqui o que funcionou, o que deu errado e o que ficou de fora.</p>
+  <details class="roteiro">
+    <summary>Sugestão de roteiro de teste</summary>
+    <ol>
+      <li>Crie uma conta e entre no sistema.</li>
+      <li>Cadastre serviços (ou carregue os dados de exemplo) e profissionais.</li>
+      <li>Cadastre clientes, busque um cliente e edite seus dados.</li>
+      <li>Crie agendamentos. Tente marcar dois no mesmo horário com o mesmo profissional, no domingo ou fora do horário.</li>
+      <li>Remarque, conclua, cancele e reabra um agendamento.</li>
+      <li>Use o filtro da agenda por dia, profissional e status.</li>
+      <li>Teste no celular.</li>
+    </ol>
+  </details>
+  <form method="post" enctype="multipart/form-data" novalidate data-validar>
+    {{ m.csrf() }}
+    <div class="grade-2">
+      {{ m.campo('nome_testador', 'Seu nome', dados, obrigatorio=true, attrs='maxlength="100" minlength="2"') }}
+      {{ m.campo('data_teste', 'Data do teste', dados, tipo='date', obrigatorio=true, attrs='max="' ~ hoje().isoformat() ~ '"') }}
+    </div>
+    {{ m.campo('email_testador', 'Seu e-mail', dados, tipo='email', ajuda='Opcional, caso eu precise tirar uma dúvida.', attrs='maxlength="120"') }}
+    {{ m.campo('funcionou', 'O que testou e funcionou', dados, tipo='textarea', ajuda='Descreva as funcionalidades que funcionaram como esperado.') }}
+    {{ m.campo('nao_funcionou', 'O que testou e não funcionou — o que deve ser corrigido', dados, tipo='textarea', ajuda='Descreva o que fez, o que esperava e o que aconteceu.') }}
+    {{ m.campo('nao_testado', 'Funcionalidade não testada (faltou ou não foi implementada)', dados, tipo='textarea', ajuda='O que você procurou e não encontrou, ou o que não chegou a testar e por quê.') }}
+    {{ m.campo('sugestoes', 'Sugestões de melhoria', dados, tipo='textarea') }}
+    <fieldset class="campo">
+      <legend>Avaliação geral da facilidade de uso</legend>
+      <div class="estrelas">
+        {% for n in range(1, 6) %}
+        <label><input type="radio" name="avaliacao" value="{{ n }}" {% if dados.get('avaliacao')|string == n|string %}checked{% endif %}> {{ n }}</label>
+        {% endfor %}
+      </div>
+      <small class="ajuda">1 = muito difícil · 5 = muito fácil</small>
+    </fieldset>
+    <div class="campo">
+      <label for="screenshot">Print da tela com erro</label>
+      <input id="screenshot" name="screenshot" type="file" accept="image/png,image/jpeg,image/gif,image/webp" data-max-bytes="2097152">
+      <small class="ajuda">Opcional. PNG, JPG, GIF ou WEBP de até 2 MB.</small>
+    </div>
+    <div class="acoes">
+      <button type="submit" class="botao botao-primario">Enviar laudo</button>
+    </div>
+  </form>
+</section>
+{% endblock %}

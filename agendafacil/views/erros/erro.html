@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block titulo %}{{ titulo }}{% endblock %}
+{% block conteudo %}
+<section class="cartao cartao-estreito centro">
+  <p class="codigo-erro">{{ codigo }}</p>
+  <h1>{{ titulo }}</h1>
+  <p>{{ mensagem }}</p>
+  <p>
+    <a class="botao botao-primario" href="{{ url_for('dashboard.inicio') }}">Ir para o início</a>
+    <a class="botao botao-secundario" href="javascript:history.back()">Voltar</a>
+  </p>
+</section>
+{% endblock %}

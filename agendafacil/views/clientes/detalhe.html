@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% import "_macros.html" as m with context %}
+{% block titulo %}{{ cliente.nome }}{% endblock %}
+{% block conteudo %}
+<nav class="trilha" aria-label="Você está em">
+  <a href="{{ url_for('clientes.lista') }}">Clientes</a> › {{ cliente.nome }}
+</nav>
+<div class="cabecalho-pagina">
+  <h1>{{ cliente.nome }}</h1>
+  <div class="acoes">
+    <a class="botao botao-primario" href="{{ url_for('agendamentos.novo', cliente_id=cliente.id) }}">+ Agendar</a>
+    <a class="botao botao-secundario" href="{{ url_for('clientes.editar', cliente_id=cliente.id) }}">Editar</a>
+    {{ m.botao_post(url_for('clientes.excluir', cliente_id=cliente.id), 'Excluir', 'botao botao-perigo-contorno',
+         confirmar='Excluir o cliente “' ~ cliente.nome ~ '”? Esta ação não pode ser desfeita.') }}
+  </div>
+</div>
+
+<section class="cartao">
+  <dl class="dados">
+    <div><dt>Telefone</dt><dd>{{ cliente.telefone|telefone }}</dd></div>
+    <div><dt>E-mail</dt><dd>{{ cliente.email or '—' }}</dd></div>
+    <div><dt>Cliente desde</dt><dd>{{ cliente.criado_em|data }}</dd></div>
+    <div class="dados-largo"><dt>Observações</dt><dd>{{ cliente.observacoes or '—' }}</dd></div>
+  </dl>
+</section>
+
+<section class="cartao">
+  <h2>Histórico de agendamentos</h2>
+  {% if historico %}
+  <div class="tabela-rolagem">
+  <table class="tabela">
+    <thead><tr><th>Data</th><th>Serviço</th><th>Profissional</th><th>Valor</th><th>Status</th></tr></thead>
+    <tbody>
+    {% for a in historico %}
+      <tr>
+        <td data-rotulo="Data">{{ a.inicio|data_hora }}</td>
+        <td data-rotulo="Serviço">{{ a.servico.nome }}</td>
+        <td data-rotulo="Profissional">{{ a.profissional.nome }}</td>
+        <td data-rotulo="Valor">{{ a.preco|moeda }}</td>
+        <td data-rotulo="Status">{{ m.selo_status(a) }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  {% else %}
+  <p class="vazio">Este cliente ainda não tem agendamentos.</p>
+  {% endif %}
+</section>
+{% endblock %}

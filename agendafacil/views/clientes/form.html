@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% import "_macros.html" as m with context %}
+{% block titulo %}{{ titulo }}{% endblock %}
+{% block conteudo %}
+<nav class="trilha" aria-label="Você está em">
+  <a href="{{ url_for('clientes.lista') }}">Clientes</a> › {{ titulo }}
+</nav>
+<section class="cartao cartao-medio">
+  <h1>{{ titulo }}</h1>
+  <form method="post" novalidate data-validar>
+    {{ m.csrf() }}
+    {{ m.campo('nome', 'Nome completo', dados, obrigatorio=true, attrs='maxlength="100" minlength="2" autofocus') }}
+    {{ m.campo('telefone', 'Telefone (com DDD)', dados, tipo='tel', obrigatorio=true, ajuda='Ex.: (11) 98765-4321', attrs='inputmode="numeric" data-mascara="telefone" maxlength="15" pattern="\\(\\d{2}\\) \\d{4,5}-\\d{4}"') }}
+    {{ m.campo('email', 'E-mail', dados, tipo='email', ajuda='Opcional.', attrs='maxlength="120"') }}
+    {{ m.campo('observacoes', 'Observações', dados, tipo='textarea', ajuda='Preferências, alergias etc. (até 500 caracteres)', attrs='maxlength="500"') }}
+    <div class="acoes">
+      <a class="botao botao-secundario" href="{{ url_for('clientes.detalhe', cliente_id=cliente_id) if cliente_id else url_for('clientes.lista') }}">Cancelar</a>
+      {% if not cliente_id %}
+      <button type="submit" name="agendar" value="1" class="botao botao-secundario">Salvar e agendar</button>
+      {% endif %}
+      <button type="submit" class="botao botao-primario">Salvar</button>
+    </div>
+  </form>
+</section>
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% import "_macros.html" as m with context %}
+{% block titulo %}Criar conta{% endblock %}
+{% block conteudo %}
+<section class="cartao cartao-estreito">
+  <h1>Criar conta</h1>
+  <p class="subtitulo">A primeira conta criada vira administradora do sistema.</p>
+  <form method="post" novalidate data-validar>
+    {{ m.csrf() }}
+    {{ m.campo('nome', 'Nome', dados, obrigatorio=true, attrs='maxlength="100" minlength="2" autocomplete="name" autofocus') }}
+    {{ m.campo('email', 'E-mail', dados, tipo='email', obrigatorio=true, attrs='maxlength="120" autocomplete="email"') }}
+    {{ m.campo('senha', 'Senha', {}, tipo='password', obrigatorio=true, ajuda='Mínimo de 6 caracteres.', attrs='minlength="6" autocomplete="new-password"') }}
+    {{ m.campo('confirmacao', 'Confirme a senha', {}, tipo='password', obrigatorio=true, attrs='minlength="6" autocomplete="new-password" data-igual-a="senha"') }}
+    <button type="submit" class="botao botao-primario botao-largo">Criar conta</button>
+  </form>
+  <p class="centro">Já tem conta? <a href="{{ url_for('auth.login') }}">Entrar</a>.</p>
+</section>
+{% endblock %}

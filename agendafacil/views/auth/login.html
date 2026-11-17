@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% import "_macros.html" as m with context %}
+{% block titulo %}Entrar{% endblock %}
+{% block conteudo %}
+<section class="cartao cartao-estreito">
+  <h1>Entrar</h1>
+  <p class="subtitulo">Acesse a agenda do seu negócio.</p>
+  <form method="post" novalidate data-validar>
+    {{ m.csrf() }}
+    {{ m.campo('email', 'E-mail', {'email': email}, tipo='email', obrigatorio=true, attrs='autocomplete="email" autofocus') }}
+    {{ m.campo('senha', 'Senha', {}, tipo='password', obrigatorio=true, attrs='autocomplete="current-password"') }}
+    <button type="submit" class="botao botao-primario botao-largo">Entrar</button>
+  </form>
+  {% if config.CADASTRO_ABERTO %}
+  <p class="centro">Ainda não tem conta? <a href="{{ url_for('auth.cadastro') }}">Crie uma agora</a>.</p>
+  <p class="centro ajuda">Está testando o sistema para o PIT? Crie uma conta e depois
+    <a href="{{ url_for('feedback.formulario') }}">envie seu laudo</a>.</p>
+  {% endif %}
+</section>
+{% endblock %}

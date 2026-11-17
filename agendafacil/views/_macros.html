@@ -1,0 +1,46 @@
+{% macro campo(nome, rotulo, dados, tipo='text', obrigatorio=false, ajuda='', attrs='') -%}
+<div class="campo">
+  <label for="{{ nome }}">{{ rotulo }}{% if obrigatorio %} <span class="obrigatorio" aria-hidden="true">*</span>{% endif %}</label>
+  {% if tipo == 'textarea' %}
+  <textarea id="{{ nome }}" name="{{ nome }}" rows="3" {% if obrigatorio %}required{% endif %} {{ attrs|safe }}
+    {% if ajuda %}aria-describedby="{{ nome }}-ajuda"{% endif %}>{{ dados.get(nome, '') or '' }}</textarea>
+  {% else %}
+  <input id="{{ nome }}" name="{{ nome }}" type="{{ tipo }}" value="{{ dados.get(nome, '') or '' }}"
+    {% if obrigatorio %}required{% endif %} {{ attrs|safe }} {% if ajuda %}aria-describedby="{{ nome }}-ajuda"{% endif %}>
+  {% endif %}
+  {% if ajuda %}<small id="{{ nome }}-ajuda" class="ajuda">{{ ajuda }}</small>{% endif %}
+</div>
+{%- endmacro %}
+
+{% macro csrf() -%}
+<input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+{%- endmacro %}
+
+{% macro botao_post(acao, rotulo, classe='botao botao-secundario', confirmar='', campos={}) -%}
+<form method="post" action="{{ acao }}" class="form-inline" {% if confirmar %}data-confirmar="{{ confirmar }}"{% endif %}>
+  {{ csrf() }}
+  {% for k, v in campos.items() %}<input type="hidden" name="{{ k }}" value="{{ v }}">{% endfor %}
+  <button type="submit" class="{{ classe }}">{{ rotulo }}</button>
+</form>
+{%- endmacro %}
+
+{% macro paginacao(pagina, endpoint) -%}
+{% if pagina.pages > 1 %}
+<nav class="paginacao" aria-label="Paginação">
+  {% set args = request.args.to_dict() %}
+  {% if pagina.has_prev %}
+    {% set _ = args.update({'pagina': pagina.prev_num}) %}
+    <a href="{{ url_for(endpoint, **args) }}">&larr; Anterior</a>
+  {% endif %}
+  <span>Página {{ pagina.page }} de {{ pagina.pages }} ({{ pagina.total }} registros)</span>
+  {% if pagina.has_next %}
+    {% set _ = args.update({'pagina': pagina.next_num}) %}
+    <a href="{{ url_for(endpoint, **args) }}">Próxima &rarr;</a>
+  {% endif %}
+</nav>
+{% endif %}
+{%- endmacro %}
+
+{% macro selo_status(agendamento) -%}
+<span class="selo selo-{{ agendamento.status }}">{{ agendamento.status_rotulo }}</span>
+{%- endmacro %}

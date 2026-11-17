@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% import "_macros.html" as m with context %}
+{% block titulo %}Laudos recebidos{% endblock %}
+{% block conteudo %}
+<div class="cabecalho-pagina">
+  <div>
+    <h1>Laudos de teste recebidos</h1>
+    <p class="subtitulo">Link para enviar aos testadores: <code>{{ url_for('feedback.formulario', _external=true) }}</code></p>
+  </div>
+  <a class="botao botao-secundario" href="{{ url_for('feedback.exportar') }}">Exportar CSV</a>
+</div>
+{% for f in pagina.items %}
+<article class="cartao laudo">
+  <header class="laudo-cabecalho">
+    <h2>{{ f.nome_testador }}</h2>
+    <span>Teste em {{ f.data_teste|data }}{% if f.avaliacao %} · Facilidade {{ f.avaliacao }}/5{% endif %}</span>
+  </header>
+  <dl class="dados">
+    <div class="dados-largo"><dt>Funcionou</dt><dd class="texto-livre">{{ f.funcionou or '—' }}</dd></div>
+    <div class="dados-largo"><dt>Não funcionou / corrigir</dt><dd class="texto-livre">{{ f.nao_funcionou or '—' }}</dd></div>
+    <div class="dados-largo"><dt>Não testado</dt><dd class="texto-livre">{{ f.nao_testado or '—' }}</dd></div>
+    <div class="dados-largo"><dt>Sugestões</dt><dd class="texto-livre">{{ f.sugestoes or '—' }}</dd></div>
+  </dl>
+  {% if f.screenshot %}
+  <a href="{{ url_for('feedback.screenshot', feedback_id=f.id) }}" target="_blank" rel="noopener">
+    <img class="miniatura" src="{{ url_for('feedback.screenshot', feedback_id=f.id) }}" alt="Print enviado por {{ f.nome_testador }}" loading="lazy">
+  </a>
+  {% endif %}
+  <footer class="acoes">
+    <small>Enviado em {{ f.criado_em|data_hora }}{% if f.email_testador %} · {{ f.email_testador }}{% endif %}</small>
+    {{ m.botao_post(url_for('feedback.excluir', feedback_id=f.id), 'Excluir', 'botao botao-pequeno botao-perigo-contorno', confirmar='Excluir o laudo de ' ~ f.nome_testador ~ '?') }}
+  </footer>
+</article>
+{% else %}
+<p class="vazio">Nenhum laudo recebido ainda. Envie o link acima para os colegas que vão testar.</p>
+{% endfor %}
+{{ m.paginacao(pagina, 'feedback.lista') }}
+{% endblock %}

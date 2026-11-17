@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% import "_macros.html" as m with context %}
+{% block titulo %}Serviços{% endblock %}
+{% block conteudo %}
+<div class="cabecalho-pagina">
+  <h1>Serviços</h1>
+  <a class="botao botao-primario" href="{{ url_for('servicos.novo') }}">+ Novo serviço</a>
+</div>
+{% if servicos %}
+<div class="tabela-rolagem">
+<table class="tabela">
+  <thead><tr><th>Serviço</th><th>Duração</th><th>Preço</th><th>Situação</th><th><span class="visualmente-oculto">Ações</span></th></tr></thead>
+  <tbody>
+  {% for s in servicos %}
+    <tr class="{% if not s.ativo %}esmaecido{% endif %}">
+      <td data-rotulo="Serviço"><strong>{{ s.nome }}</strong>{% if s.descricao %}<br><small>{{ s.descricao }}</small>{% endif %}</td>
+      <td data-rotulo="Duração">{{ s.duracao_min }} min</td>
+      <td data-rotulo="Preço">{{ s.preco|moeda }}</td>
+      <td data-rotulo="Situação"><span class="selo {{ 'selo-agendado' if s.ativo else 'selo-cancelado' }}">{{ 'Ativo' if s.ativo else 'Desativado' }}</span></td>
+      <td class="acoes-linha">
+        <a class="botao botao-pequeno botao-secundario" href="{{ url_for('servicos.editar', servico_id=s.id) }}">Editar</a>
+        {{ m.botao_post(url_for('servicos.alternar', servico_id=s.id), 'Desativar' if s.ativo else 'Reativar', 'botao botao-pequeno botao-secundario') }}
+        {{ m.botao_post(url_for('servicos.excluir', servico_id=s.id), 'Excluir', 'botao botao-pequeno botao-perigo-contorno',
+             confirmar='Excluir o serviço “' ~ s.nome ~ '”?') }}
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% else %}
+<p class="vazio">Nenhum serviço cadastrado. <a href="{{ url_for('servicos.novo') }}">Cadastre o primeiro</a>.</p>
+{% endif %}
+{% endblock %}

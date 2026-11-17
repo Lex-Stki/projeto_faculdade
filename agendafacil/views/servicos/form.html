@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% import "_macros.html" as m with context %}
+{% block titulo %}{{ titulo }}{% endblock %}
+{% block conteudo %}
+<nav class="trilha" aria-label="Você está em">
+  <a href="{{ url_for('servicos.lista') }}">Serviços</a> › {{ titulo }}
+</nav>
+<section class="cartao cartao-medio">
+  <h1>{{ titulo }}</h1>
+  <form method="post" novalidate data-validar>
+    {{ m.csrf() }}
+    {{ m.campo('nome', 'Nome do serviço', dados, obrigatorio=true, attrs='maxlength="80" minlength="2" autofocus') }}
+    {{ m.campo('descricao', 'Descrição', dados, tipo='textarea', ajuda='Opcional (até 255 caracteres).', attrs='maxlength="255"') }}
+    <div class="grade-2">
+      {{ m.campo('duracao_min', 'Duração (minutos)', dados, tipo='number', obrigatorio=true, ajuda='Entre 5 e 480.', attrs='min="5" max="480" step="5"') }}
+      {{ m.campo('preco', 'Preço (R$)', dados, obrigatorio=true, ajuda='Ex.: 45,00', attrs='inputmode="decimal" pattern="\\d{1,5}([,.]\\d{1,2})?"') }}
+    </div>
+    <div class="acoes">
+      <a class="botao botao-secundario" href="{{ url_for('servicos.lista') }}">Cancelar</a>
+      <button type="submit" class="botao botao-primario">Salvar</button>
+    </div>
+  </form>
+</section>
+{% endblock %}

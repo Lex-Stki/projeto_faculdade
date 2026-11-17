@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% import "_macros.html" as m with context %}
+{% block titulo %}{{ titulo }}{% endblock %}
+{% block conteudo %}
+<nav class="trilha" aria-label="Você está em">
+  <a href="{{ url_for('agendamentos.lista') }}">Agenda</a> › {{ titulo }}
+</nav>
+<section class="cartao cartao-medio">
+  <h1>{{ titulo }}</h1>
+  {% if not servicos or not profissionais %}
+  <div class="alerta alerta-aviso">
+    Antes de agendar, cadastre pelo menos um
+    {% if not servicos %}<a href="{{ url_for('servicos.novo') }}">serviço</a>{% endif %}
+    {% if not servicos and not profissionais %} e um {% endif %}
+    {% if not profissionais %}<a href="{{ url_for('profissionais.novo') }}">profissional</a>{% endif %}.
+  </div>
+  {% endif %}
+  <form method="post" novalidate data-validar id="form-agendamento"
+        data-url-disponibilidade="{{ url_for('agendamentos.disponibilidade') }}"
+        data-ignorar="{{ agendamento.id if agendamento else '' }}">
+    {{ m.csrf() }}
+    <div class="campo">
+      <label for="cliente_id">Cliente <span class="obrigatorio" aria-hidden="true">*</span></label>
+      <select id="cliente_id" name="cliente_id" required>
+        <option value="">Selecione…</option>
+        {% for c in clientes %}
+        <option value="{{ c.id }}" {% if dados.get('cliente_id')|string == c.id|string %}selected{% endif %}>{{ c.nome }} · {{ c.telefone|telefone }}</option>
+        {% endfor %}
+      </select>
+      <small class="ajuda">Não encontrou? <a href="{{ url_for('clientes.novo') }}">Cadastrar novo cliente</a>.</small>
+    </div>
+    <div class="campo">
+      <label for="servico_id">Serviço <span class="obrigatorio" aria-hidden="true">*</span></label>
+      <select id="servico_id" name="servico_id" required>
+        <option value="">Selecione…</option>
+        {% for s in servicos %}
+        <option value="{{ s.id }}" data-duracao="{{ s.duracao_min }}" {% if dados.get('servico_id')|string == s.id|string %}selected{% endif %}>
+          {{ s.nome }} · {{ s.duracao_min }} min · {{ s.preco|moeda }}{% if not s.ativo %} (desativado){% endif %}
+        </option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="campo">
+      <label for="profissional_id">Profissional <span class="obrigatorio" aria-hidden="true">*</span></label>
+      <select id="profissional_id" name="profissional_id" required>
+        <option value="">Selecione…</option>
+        {% for p in profissionais %}
+        <option value="{{ p.id }}" {% if dados.get('profissional_id')|string == p.id|string %}selected{% endif %}>
+          {{ p.nome }}{% if p.especialidade %} · {{ p.especialidade }}{% endif %}{% if not p.ativo %} (inativo){% endif %}
+        </option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="grade-2">
+      {{ m.campo('data', 'Data', dados, tipo='date', obrigatorio=true, attrs='min="' ~ hoje().isoformat() ~ '"') }}
+      {{ m.campo('hora', 'Horário de início', dados, tipo='time', obrigatorio=true,
+                 ajuda='Funcionamento: ' ~ abertura ~ ' às ' ~ fechamento ~ ', de segunda a sábado.',
+                 attrs='min="' ~ abertura ~ '" max="' ~ fechamento ~ '" step="300"') }}
+    </div>
+    <p id="previsao-termino" class="previsao" aria-live="polite"></p>
+    <div id="painel-disponibilidade" class="disponibilidade" aria-live="polite" hidden></div>
+    {{ m.campo('observacoes', 'Observações', dados, tipo='textarea', ajuda='Opcional (até 500 caracteres).', attrs='maxlength="500"') }}
+    <div class="acoes">
+      <a class="botao botao-secundario" href="{{ url_for('agendamentos.lista') }}">Cancelar</a>
+      <button type="submit" class="botao botao-primario">Salvar agendamento</button>
+    </div>
+  </form>
+</section>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/agendamento.js') }}" defer></script>
+{% endblock %}

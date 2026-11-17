@@ -1,0 +1,18 @@
+# Ambiente
+.venv/
+__pycache__/
+*.pyc
+.env
+instance/
+.pytest_cache/
+.coverage
+htmlcov/
+.vercel/
+
+# Material do curso e entrega com dados pessoais (não versionar)
+00 Documentos Fonte/
+entrega/
+
+# Windows
+desktop.ini
+Thumbs.db
