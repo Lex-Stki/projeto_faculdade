@@ -51,6 +51,6 @@ Arquivos de teste: `tests/test_models.py` (unidade), `tests/test_controllers.py`
 | RNF05 | Segurança | Senhas guardadas como *hash*; proteção contra CSRF; cookie `HttpOnly`/`SameSite`/`Secure`; sem *open redirect*; cabeçalhos `X-Frame-Options` e `nosniff`; upload validado pela assinatura do arquivo | `utils.py`, `__init__.py`, `models/feedback.py`; testes em `TestAutenticacao` e `test_utils.py` |
 | RNF06 | Integridade | Regras validadas no servidor **e** garantidas no banco (`NOT NULL`, `UNIQUE`, `CHECK`, `FOREIGN KEY`) | [05-banco-de-dados.md](05-banco-de-dados.md) |
 | RNF07 | Desempenho | Consultas de agenda usam índice (`profissional_id, inicio`); listas paginadas (10 por página) | `schema.sql` |
-| RNF08 | Manutenibilidade | Arquitetura MVC; cobertura de testes automatizados ≥ 90% | 123 testes, 94% de cobertura |
+| RNF08 | Manutenibilidade | Arquitetura MVC; cobertura de testes automatizados ≥ 90% | 125 testes, 94% de cobertura |
 | RNF09 | Disponibilidade | Hospedado no Render com banco gerenciado (Neon); rota `/saude` para checar aplicação e banco | `dashboard.saude` |
 | RNF10 | Robustez | Nenhum erro técnico aparece para o usuário; páginas amigáveis para 400, 403, 404, 413 e 500 | `_registrar_erros` em `__init__.py` |

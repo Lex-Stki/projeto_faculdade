@@ -21,7 +21,7 @@ flowchart LR
 
 | Nível do Modelo V | O que valida | Onde | Qtde. |
 |---|---|---|---|
-| **Unitário** | Cada regra de negócio do Model isolada: cálculo de término, conflitos, horário, transições de status, validações de cliente, serviço, usuário e laudo; utilitários de formatação e segurança | `tests/test_models.py`, `tests/test_utils.py` | 81 |
+| **Unitário** | Cada regra de negócio do Model isolada: cálculo de término, conflitos, horário, transições de status, validações de cliente, serviço, usuário e laudo; utilitários de formatação e segurança | `tests/test_models.py`, `tests/test_utils.py` | 83 |
 | **Integração** | Requisição HTTP → Controller → Model → banco → View: login, CSRF, CRUDs, filtros, paginação, JSON de disponibilidade, upload, permissões, páginas de erro | `tests/test_controllers.py` | 40 |
 | **Sistema (E2E)** | Servidor real + navegador real (Edge/Chrome): máscara de telefone, validação no navegador, término previsto, painel de disponibilidade, diálogo de confirmação, layout no celular, ausência de erros de JavaScript | `tests/e2e/test_fluxos.py` | 2 cenários (23 verificações) |
 | **Aceitação** | Uso real por 5 colegas, registrado pelo formulário de laudo | Situação 3: [plano de testes](../situacao-3/01-plano-de-testes.md) | 5 testadores |
@@ -63,7 +63,7 @@ agendafacil\seed.py                           22      0   100%
 agendafacil\utils.py                          82      0   100%
 --------------------------------------------------------------
 TOTAL                                        975     63    94%
-123 passed
+125 passed
 ```
 
 As linhas não cobertas são, na maior parte, caminhos de erro repetidos entre controllers parecidos (ex.: "profissional não encontrado → 404", já testado para clientes) e os ramos que só rodam em produção no Render/Vercel (falta de variáveis de ambiente, testados à parte em `test_utils.py`).

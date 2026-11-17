@@ -12,7 +12,7 @@
 
 | Indicador | Resultado |
 |---|---|
-| Testes automatizados | **123 aprovados / 0 falhas** (81 unidade, 40 integração, 2 cenários E2E) |
+| Testes automatizados | **125 aprovados / 0 falhas** (83 unidade, 40 integração, 2 cenários E2E) |
 | Cobertura de código | **94 %** |
 | Defeitos encontrados na verificação interna e no deploy | 6 (2 altas, 2 médias, 2 baixas) |
 | Defeitos corrigidos | 6 de 6, cada um com teste de regressão |
@@ -72,14 +72,15 @@
 | **Correção** | Remoção do `?` final em `login_obrigatorio`. |
 | **Status** | Corrigido |
 
-### D6: Primeiro deploy falhou com `ModuleNotFoundError: No module named 'psycopg'` (alta)
+### D6: Deploy no Render falhava com `ModuleNotFoundError: No module named 'psycopg'` (alta)
 
 | | |
 |---|---|
-| **Como foi encontrado** | Primeiro deploy no Render (validação em ambiente real). |
-| **Causa** | A connection string copiada do painel do Neon vinha no formato `postgresql+psycopg://…`, que pede o driver *psycopg 3*. O projeto usa o *psycopg2*, então a aplicação não iniciava. Os testes não pegaram o problema porque sempre usavam uma URL no formato `postgresql://`. |
-| **Correção** | `config.normalizar_url_postgres()` aceita as variações `postgres://`, `postgresql+psycopg://`, `postgresql+psycopg2://`, `postgresql+asyncpg://` e remove aspas e espaços colados por engano, sempre usando o driver instalado. |
-| **Testes de regressão** | `test_url_postgres_e_normalizada` (5 variações), `test_url_de_outro_banco_nao_e_alterada` |
+| **Como foi encontrado** | Primeiro deploy no Render (validação em ambiente real). A aplicação não iniciava. |
+| **Causa** | A partir do **SQLAlchemy 2.1** (versão usada no projeto), um endereço `postgresql://` sem driver explícito passa a usar o *psycopg 3*, mas o projeto instala o *psycopg2*. Os testes não pegaram o problema porque rodam em SQLite e só comparavam o texto da URL, sem verificar qual driver seria carregado. |
+| **Primeira tentativa (incorreta)** | A primeira hipótese foi que o painel do Neon gerava a URL no formato `postgresql+psycopg://`. A normalização feita para isso não resolveu: o segundo deploy falhou com o mesmo erro, o que mostrou que a causa era outra. Fica registrado como aprendizado: a correção precisa ser validada no ambiente onde o erro aconteceu. |
+| **Correção** | `config.normalizar_url_postgres()` converte qualquer variação (`postgres://`, `postgresql://`, `postgresql+psycopg://`, `postgresql+asyncpg://`, com aspas ou espaços colados) para **`postgresql+psycopg2://`**, deixando o driver explícito. |
+| **Testes de regressão** | `test_url_postgres_e_normalizada` (6 variações), `test_driver_postgres_carregado_esta_instalado` (verifica que o driver escolhido pelo SQLAlchemy é o psycopg2 e que ele importa), `test_url_de_outro_banco_nao_e_alterada` |
 | **Status** | Corrigido |
 
 Na primeira execução da suíte houve também uma falha em `test_desativar_e_reativar_servico` que **era erro do próprio teste**: ele procurava a palavra "Corte" na página, mas ela aparecia na mensagem "Serviço “Corte” desativado". O teste foi ajustado para procurar o texto da opção do formulário. Não houve mudança no sistema.

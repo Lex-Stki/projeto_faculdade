@@ -53,15 +53,26 @@ def test_destino_seguro(url, esperado):
 
 
 @pytest.mark.parametrize("colada", [
+    "postgresql://u:s@host/db?sslmode=require",           # formato padrão do Neon (falhou no 1º deploy)
     "postgres://u:s@host/db?sslmode=require",
-    "postgresql+psycopg://u:s@host/db?sslmode=require",   # modelo "SQLAlchemy" do Neon (falhou no 1º deploy)
+    "postgresql+psycopg://u:s@host/db?sslmode=require",
     "postgresql+psycopg2://u:s@host/db?sslmode=require",
     "postgresql+asyncpg://u:s@host/db?sslmode=require",
     "  'postgresql://u:s@host/db?sslmode=require'\n",
 ])
 def test_url_postgres_e_normalizada(monkeypatch, colada):
     monkeypatch.setenv("DATABASE_URL", colada)
-    assert config.url_banco() == "postgresql://u:s@host/db?sslmode=require"
+    assert config.url_banco() == "postgresql+psycopg2://u:s@host/db?sslmode=require"
+
+
+def test_driver_postgres_carregado_esta_instalado(monkeypatch):
+    """Teste que teria pegado o D6: o SQLAlchemy precisa carregar um driver que está no requirements.txt."""
+    from sqlalchemy.engine import make_url
+
+    monkeypatch.setenv("DATABASE_URL", "postgresql://u:s@host/db?sslmode=require")
+    dialeto = make_url(config.url_banco()).get_dialect()
+    assert dialeto.driver == "psycopg2"
+    dialeto.import_dbapi()  # falha com ModuleNotFoundError se o driver não estiver instalado
 
 
 def test_url_de_outro_banco_nao_e_alterada():

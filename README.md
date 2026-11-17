@@ -32,7 +32,7 @@ O sistema organiza clientes, serviços, profissionais e a agenda e **impede auto
 | Banco de dados | **PostgreSQL** (Neon) via SQLAlchemy; SQLite nos testes |
 | Front-end | HTML5, CSS3 e JavaScript puro (templates Jinja2) |
 | Hospedagem | **Render** (Web Service Python com gunicorn); compatível também com Vercel |
-| Testes | pytest, pytest-cov, Playwright: **123 testes, 94% de cobertura** |
+| Testes | pytest, pytest-cov, Playwright: **125 testes, 94% de cobertura** |
 | Modo de codificação | Tradicional |
 
 ## Rodar localmente

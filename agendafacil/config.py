@@ -36,13 +36,16 @@ def normalizar_url_postgres(url: str) -> str:
     """Aceita as variações que os painéis de banco oferecem para copiar.
 
     - remove espaços e aspas colados junto ("'postgresql://...'");
-    - troca "postgres://", "postgresql+psycopg://" (psycopg 3), "postgresql+asyncpg://" etc.
-      por "postgresql://", que usa o driver instalado no projeto (psycopg2).
+    - troca "postgres://", "postgresql://", "postgresql+psycopg://", "postgresql+asyncpg://" etc.
+      por "postgresql+psycopg2://", o driver instalado no projeto.
+
+    O driver precisa ser explícito: a partir do SQLAlchemy 2.1, "postgresql://" sozinho usa
+    o psycopg 3, que não está instalado (defeito D6 do laudo de qualidade).
     """
     url = url.strip().strip("'\"").strip()
     esquema, separador, resto = url.partition("://")
     if separador and esquema.split("+")[0] in ("postgres", "postgresql"):
-        return "postgresql://" + resto
+        return "postgresql+psycopg2://" + resto
     return url
 
 

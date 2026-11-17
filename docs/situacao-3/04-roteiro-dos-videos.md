@@ -22,7 +22,7 @@ Dica: grave a tela com o **Xbox Game Bar** (Win + G) ou o **OBS Studio**, publiq
 | 4:30–5:15 | Agenda | Filtros; Remarcar; Cancelar (diálogo) e Reabrir; tentar concluir um atendimento futuro. |
 | 5:15–5:45 | Serviços | Desativar um serviço e mostrar que ele some do agendamento; tentar excluir um serviço já usado. |
 | 5:45–6:15 | Celular (F12 → modo dispositivo) | Layout responsivo. |
-| 6:15–7:00 | Terminal: `pytest --cov=agendafacil` | 123 testes passando e 94% de cobertura; mostrar um teste de regra de negócio e o teste E2E. |
+| 6:15–7:00 | Terminal: `pytest --cov=agendafacil` | 125 testes passando e 94% de cobertura; mostrar um teste de regra de negócio e o teste E2E. |
 | 7:00–7:30 | Formulário `/feedback` | Como os colegas vão testar e enviar o laudo com captura de tela. Encerramento. |
 
 ## Vídeo 2: Solução atualizada (≤ 5 min)
