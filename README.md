@@ -6,8 +6,8 @@ O sistema organiza clientes, serviços, profissionais e a agenda e **impede auto
 
 | | |
 |---|---|
-| **Sistema no ar** | *(link do Render, preencher após o deploy)* |
-| **Formulário de teste** | *(link do Render)*`/feedback` |
+| **Sistema no ar** | https://agendafacil-scyw.onrender.com |
+| **Formulário de teste** | https://agendafacil-scyw.onrender.com/feedback |
 | **Vídeo de apresentação** | *(link do YouTube)* |
 | **Vídeo da versão atualizada** | *(link do YouTube)* |
 

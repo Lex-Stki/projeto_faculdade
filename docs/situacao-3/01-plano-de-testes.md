@@ -20,8 +20,8 @@
 > Oi! Estou terminando meu Projeto Integrador e preciso que você teste meu sistema por uns 15 minutos.
 > É um sistema de agendamento para salão/barbearia.
 > (A primeira abertura pode demorar uns 50 segundos: o servidor gratuito "acorda". Depois fica rápido.)
-> 1) Acesse **https://SEU-SERVICO.onrender.com**, crie uma conta e use como se fosse dono(a) de um salão (o roteiro abaixo ajuda).
-> 2) No final, preencha o laudo em **https://SEU-SERVICO.onrender.com/feedback**. Pode mandar print dos erros!
+> 1) Acesse **https://agendafacil-scyw.onrender.com**, crie uma conta e use como se fosse dono(a) de um salão (o roteiro abaixo ajuda).
+> 2) No final, preencha o laudo em **https://agendafacil-scyw.onrender.com/feedback**. Pode mandar print dos erros!
 > Pode ser bem sincero(a): os erros que você achar vão me ajudar a melhorar a nota. Obrigado!
 
 ## 1.3 Roteiro de casos de teste (para os testadores)

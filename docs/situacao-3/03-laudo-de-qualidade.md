@@ -17,6 +17,7 @@
 | Defeitos encontrados na verificação interna e no deploy | 6 (2 altas, 2 médias, 2 baixas) |
 | Defeitos corrigidos | 6 de 6, cada um com teste de regressão |
 | Erros de JavaScript no navegador durante o E2E | 0 |
+| Validação em produção | **OK**: `https://agendafacil-scyw.onrender.com/saude` responde `banco: ok`; agendamento criado e listado no PostgreSQL (Neon), evidência `11-producao-agendamento-criado.png` |
 | Testes de aceitação (colegas) | **Pendente**: ver seção 3.4 |
 
 ## 3.2 Defeitos encontrados na verificação interna e correções
@@ -90,10 +91,10 @@ Na primeira execução da suíte houve também uma falha em `test_desativar_e_re
 | # | Limitação | Risco | Tratamento |
 |---|---|---|---|
 | L1 | Duas pessoas salvando agendamentos conflitantes **no mesmo segundo** poderiam passar ambas pela verificação | Baixo para um pequeno negócio (1–2 atendentes) | Evolução: restrição de exclusão no PostgreSQL (`EXCLUDE USING gist`) |
-| L2 | O formato dos campos de data e hora (ex.: 01/07/2030 × 07/01/2030, AM/PM) segue o idioma do **navegador**, não do site | Confusão em navegadores configurados em inglês | Documentado; os textos do sistema usam sempre dd/mm/aaaa |
+| L2 | O formato dos campos de data e hora (ex.: 01/07/2030 × 07/01/2030, AM/PM) segue o idioma do **navegador**, não do site | Confusão em navegadores configurados em inglês | Documentado; os textos do sistema usam sempre dd/mm/aaaa. Em navegador em português aparece dd/mm/aaaa (confirmado na evidência 11) |
 | L3 | Não há recuperação de senha por e-mail | Usuário bloqueado se esquecer a senha | Fora do escopo (próxima versão) |
 | L4 | Cadastro aberto: qualquer pessoa com o link pode criar conta e ver os dados | Exposição de dados de clientes | Necessário durante os testes; depois, `CADASTRO_ABERTO=0` |
-| L5 | A suíte automatizada roda em SQLite; em PostgreSQL só foi verificada por revisão | Diferença de comportamento entre bancos | Rodar `TEST_DATABASE_URL=<branch de teste do Neon> pytest` após criar o banco e conferir `/saude` em produção |
+| L5 | A suíte automatizada roda em SQLite; em PostgreSQL a aplicação foi validada em produção (deploy no Neon, `/saude` e fluxo de agendamento), mas a suíte completa ainda não rodou contra PostgreSQL | Diferença de comportamento entre bancos em casos não exercitados manualmente | Rodar `TEST_DATABASE_URL=<branch de teste do Neon> pytest` |
 
 ## 3.4 Resultados dos testes de aceitação (colegas)
 
@@ -132,3 +133,4 @@ Todas as capturas em [`evidencias/`](evidencias/) foram geradas automaticamente 
 | `09-laudos-recebidos.png` | Laudo de teste recebido (RF10/RF11) |
 | `10-erro-404.png` | Página de erro amigável (RNF10) |
 | `D1-antes-da-correcao.png` | Defeito D1 no momento em que foi detectado |
+| `11-producao-agendamento-criado.png` | Sistema em produção (Render + Neon): agendamento criado e listado, data em formato brasileiro, modo escuro |
