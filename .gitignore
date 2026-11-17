@@ -3,6 +3,8 @@
 __pycache__/
 *.pyc
 .env
+.env.*
+!.env.example
 instance/
 .pytest_cache/
 .coverage
