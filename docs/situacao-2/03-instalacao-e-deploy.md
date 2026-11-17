@@ -42,7 +42,7 @@ Comandos úteis:
 
 ### Passo 2: Criar o banco PostgreSQL (Neon)
 1. No projeto do Vercel, abra a aba **Storage → Create Database → Neon (Serverless Postgres)**.
-2. Escolha a região mais próxima (ex.: `São Paulo` ou `Washington, D.C.`), aceite o plano gratuito e **conecte ao projeto** (marque Production e Preview).
+2. Escolha a **mesma região das funções do Vercel** (padrão: `Washington, D.C. (iad1)`; um banco em São Paulo deixaria cada consulta mais lenta, porque a função roda nos EUA), aceite o plano gratuito e **conecte ao projeto** (marque Production e Preview).
 3. O Vercel cria sozinho a variável `DATABASE_URL`. A aplicação também aceita `POSTGRES_URL`.
 
 ### Passo 3: Publicar de novo
