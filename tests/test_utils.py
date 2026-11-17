@@ -52,9 +52,20 @@ def test_destino_seguro(url, esperado):
     assert utils.destino_seguro(url) == esperado
 
 
-def test_url_postgres_e_convertida(monkeypatch):
-    monkeypatch.setenv("DATABASE_URL", "postgres://u:s@host/db?sslmode=require")
+@pytest.mark.parametrize("colada", [
+    "postgres://u:s@host/db?sslmode=require",
+    "postgresql+psycopg://u:s@host/db?sslmode=require",   # modelo "SQLAlchemy" do Neon (falhou no 1º deploy)
+    "postgresql+psycopg2://u:s@host/db?sslmode=require",
+    "postgresql+asyncpg://u:s@host/db?sslmode=require",
+    "  'postgresql://u:s@host/db?sslmode=require'\n",
+])
+def test_url_postgres_e_normalizada(monkeypatch, colada):
+    monkeypatch.setenv("DATABASE_URL", colada)
     assert config.url_banco() == "postgresql://u:s@host/db?sslmode=require"
+
+
+def test_url_de_outro_banco_nao_e_alterada():
+    assert config.normalizar_url_postgres("sqlite:///x.db") == "sqlite:///x.db"
 
 
 @pytest.mark.parametrize("plataforma", ["RENDER", "VERCEL"])

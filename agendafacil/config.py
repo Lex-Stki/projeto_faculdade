@@ -32,13 +32,24 @@ def em_producao() -> bool:
     return bool(os.environ.get("RENDER") or os.environ.get("VERCEL"))
 
 
+def normalizar_url_postgres(url: str) -> str:
+    """Aceita as variações que os painéis de banco oferecem para copiar.
+
+    - remove espaços e aspas colados junto ("'postgresql://...'");
+    - troca "postgres://", "postgresql+psycopg://" (psycopg 3), "postgresql+asyncpg://" etc.
+      por "postgresql://", que usa o driver instalado no projeto (psycopg2).
+    """
+    url = url.strip().strip("'\"").strip()
+    esquema, separador, resto = url.partition("://")
+    if separador and esquema.split("+")[0] in ("postgres", "postgresql"):
+        return "postgresql://" + resto
+    return url
+
+
 def url_banco() -> str:
     url = os.environ.get("DATABASE_URL") or os.environ.get("POSTGRES_URL")
     if url:
-        # SQLAlchemy exige o prefixo "postgresql://"
-        if url.startswith("postgres://"):
-            url = "postgresql://" + url[len("postgres://"):]
-        return url
+        return normalizar_url_postgres(url)
     if em_producao():
         raise RuntimeError(
             "DATABASE_URL não configurada. Crie a variável DATABASE_URL com a URL do PostgreSQL (Neon) "
