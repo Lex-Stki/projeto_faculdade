@@ -6,8 +6,8 @@ O sistema organiza clientes, serviços, profissionais e a agenda e **impede auto
 
 | | |
 |---|---|
-| **Sistema no ar** | *(link do Vercel, preencher após o deploy)* |
-| **Formulário de teste** | *(link do Vercel)*`/feedback` |
+| **Sistema no ar** | *(link do Render, preencher após o deploy)* |
+| **Formulário de teste** | *(link do Render)*`/feedback` |
 | **Vídeo de apresentação** | *(link do YouTube)* |
 | **Vídeo da versão atualizada** | *(link do YouTube)* |
 
@@ -31,8 +31,8 @@ O sistema organiza clientes, serviços, profissionais e a agenda e **impede auto
 | Back-end | **Python 3.12 + Flask 3**, padrão **MVC** |
 | Banco de dados | **PostgreSQL** (Neon) via SQLAlchemy; SQLite nos testes |
 | Front-end | HTML5, CSS3 e JavaScript puro (templates Jinja2) |
-| Hospedagem | **Vercel** (função serverless Python) |
-| Testes | pytest, pytest-cov, Playwright: **116 testes, 93% de cobertura** |
+| Hospedagem | **Render** (Web Service Python com gunicorn); compatível também com Vercel |
+| Testes | pytest, pytest-cov, Playwright: **118 testes, 94% de cobertura** |
 | Modo de codificação | Tradicional |
 
 ## Rodar localmente
@@ -46,7 +46,7 @@ flask --app agendafacil run --debug
 
 Acesse http://127.0.0.1:5000. Testes: `pytest --cov=agendafacil`.
 
-Publicação no Vercel + Neon: veja [docs/situacao-2/03-instalacao-e-deploy.md](docs/situacao-2/03-instalacao-e-deploy.md).
+Publicação no Render + Neon: veja [docs/situacao-2/03-instalacao-e-deploy.md](docs/situacao-2/03-instalacao-e-deploy.md).
 
 ## Documentação
 
@@ -66,7 +66,8 @@ agendafacil/
   controllers/   Controller: rotas (Blueprints)
   views/         View: templates HTML
   static/        CSS, JavaScript e imagens
-api/index.py     entrada do Vercel
+wsgi.py          entrada do servidor (Render/gunicorn)
+api/index.py     entrada alternativa para o Vercel
 tests/           unidade, integração e e2e/
 docs/            documentação por Situação-Problema
 ```

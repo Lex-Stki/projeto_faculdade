@@ -62,7 +62,7 @@ Construir o **AgendaFácil**, uma aplicação web responsiva que funcione no com
 
 - **Linguagem**: Python 3.12, uma das linguagens sugeridas pela disciplina, com o *framework* Flask.
 - **Padrão de projeto**: MVC, como indica o material da disciplina.
-- **Banco de dados**: PostgreSQL, um SGBD popular e de fácil manutenção, como pede o material ("nada de usar SGBD obscuros"). Em produção usa o Neon (PostgreSQL gerenciado e integrado ao Vercel); nos testes, SQLite em memória.
-- **Hospedagem**: Vercel (função *serverless* Python). Por isso nada pode ser gravado em disco, e capturas de tela dos testadores ficam no banco.
+- **Banco de dados**: PostgreSQL, um SGBD popular e de fácil manutenção, como pede o material ("nada de usar SGBD obscuros"). Em produção usa o Neon (PostgreSQL gerenciado, com plano gratuito); nos testes, SQLite em memória.
+- **Hospedagem**: Render (Web Service Python, plano gratuito). O disco do serviço é temporário e se perde a cada novo deploy, por isso tudo, inclusive as capturas de tela dos testadores, fica no banco. O projeto também roda no Vercel.
 - **Modo de codificação**: tradicional (HTML, CSS e JavaScript no front-end; Python no back-end), sem ferramentas *no-code*.
 - **Regras de funcionamento** (configuráveis em `agendafacil/config.py`): segunda a sábado, das 08:00 às 20:00, fuso `America/Sao_Paulo`.

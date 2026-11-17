@@ -57,8 +57,11 @@ def test_url_postgres_e_convertida(monkeypatch):
     assert config.url_banco() == "postgresql://u:s@host/db?sslmode=require"
 
 
-def test_producao_exige_banco_e_chave(monkeypatch):
-    monkeypatch.setenv("VERCEL", "1")
+@pytest.mark.parametrize("plataforma", ["RENDER", "VERCEL"])
+def test_producao_exige_banco_e_chave(monkeypatch, plataforma):
+    monkeypatch.delenv("RENDER", raising=False)
+    monkeypatch.delenv("VERCEL", raising=False)
+    monkeypatch.setenv(plataforma, "true")
     monkeypatch.delenv("DATABASE_URL", raising=False)
     monkeypatch.delenv("POSTGRES_URL", raising=False)
     monkeypatch.delenv("SECRET_KEY", raising=False)
@@ -66,3 +69,27 @@ def test_producao_exige_banco_e_chave(monkeypatch):
         config.url_banco()
     with pytest.raises(RuntimeError, match="SECRET_KEY"):
         config.chave_secreta()
+
+
+def test_links_externos_usam_https_atras_do_proxy(monkeypatch):
+    """No Render/Vercel o app recebe HTTP do proxy; os links públicos precisam sair com https://."""
+    from agendafacil import create_app
+    from agendafacil.extensions import db
+    from agendafacil.models import Usuario
+
+    monkeypatch.setenv("RENDER", "true")
+    app = create_app({"TESTING": True, "SECRET_KEY": "x", "SQLALCHEMY_DATABASE_URI": "sqlite://",
+                      "SESSION_COOKIE_SECURE": False})
+    with app.app_context():
+        admin = Usuario(nome="Admin", email="a@a.com", perfil="admin")
+        admin.definir_senha("123456")
+        db.session.add(admin)
+        db.session.commit()
+        cliente = app.test_client()
+        with cliente.session_transaction() as sessao:
+            sessao["usuario_id"] = admin.id
+        pagina = cliente.get("/feedback/recebidos", headers={
+            "X-Forwarded-Proto": "https", "X-Forwarded-Host": "agendafacil.onrender.com"})
+        assert "https://agendafacil.onrender.com/feedback/" in pagina.get_data(as_text=True)
+        db.session.remove()
+        db.engine.dispose()

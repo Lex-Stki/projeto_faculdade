@@ -21,7 +21,7 @@ flowchart LR
 
 | Nível do Modelo V | O que valida | Onde | Qtde. |
 |---|---|---|---|
-| **Unitário** | Cada regra de negócio do Model isolada: cálculo de término, conflitos, horário, transições de status, validações de cliente, serviço, usuário e laudo; utilitários de formatação e segurança | `tests/test_models.py`, `tests/test_utils.py` | 74 |
+| **Unitário** | Cada regra de negócio do Model isolada: cálculo de término, conflitos, horário, transições de status, validações de cliente, serviço, usuário e laudo; utilitários de formatação e segurança | `tests/test_models.py`, `tests/test_utils.py` | 76 |
 | **Integração** | Requisição HTTP → Controller → Model → banco → View: login, CSRF, CRUDs, filtros, paginação, JSON de disponibilidade, upload, permissões, páginas de erro | `tests/test_controllers.py` | 40 |
 | **Sistema (E2E)** | Servidor real + navegador real (Edge/Chrome): máscara de telefone, validação no navegador, término previsto, painel de disponibilidade, diálogo de confirmação, layout no celular, ausência de erros de JavaScript | `tests/e2e/test_fluxos.py` | 2 cenários (23 verificações) |
 | **Aceitação** | Uso real por 5 colegas, registrado pelo formulário de laudo | Situação 3: [plano de testes](../situacao-3/01-plano-de-testes.md) | 5 testadores |
@@ -44,7 +44,7 @@ Por padrão os testes usam **SQLite em memória**: são rápidos e não sujam ne
 $ pytest --cov=agendafacil --cov-report=term
 Name                                       Stmts   Miss  Cover
 --------------------------------------------------------------
-agendafacil\__init__.py                       65      6    91%
+agendafacil\__init__.py                       68      6    91%
 agendafacil\config.py                         37      5    86%
 agendafacil\controllers\agendamentos.py       98      3    97%
 agendafacil\controllers\auth.py               53      2    96%
@@ -62,11 +62,11 @@ agendafacil\models\usuario.py                 33      1    97%
 agendafacil\seed.py                           22      0   100%
 agendafacil\utils.py                          82      0   100%
 --------------------------------------------------------------
-TOTAL                                        968     63    93%
-116 passed
+TOTAL                                        971     63    94%
+118 passed
 ```
 
-As linhas não cobertas são, na maior parte, caminhos de erro repetidos entre controllers parecidos (ex.: "profissional não encontrado → 404", já testado para clientes) e os ramos que só rodam no Vercel (falta de variáveis de ambiente, testados à parte em `test_utils.py`).
+As linhas não cobertas são, na maior parte, caminhos de erro repetidos entre controllers parecidos (ex.: "profissional não encontrado → 404", já testado para clientes) e os ramos que só rodam em produção no Render/Vercel (falta de variáveis de ambiente, testados à parte em `test_utils.py`).
 
 ## 4.4 Exemplos
 

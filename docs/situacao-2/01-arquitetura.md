@@ -7,9 +7,9 @@
 | Linguagem do back-end | **Python 3.12** | Linguagem sugerida pela disciplina; sintaxe clara e ecossistema maduro para web. |
 | Framework web | **Flask 3** | Leve; deixa explícita a separação Model/View/Controller (Blueprints + Jinja2 + SQLAlchemy). |
 | ORM | **SQLAlchemy 2 / Flask-SQLAlchemy** | Mapeia as classes do diagrama para tabelas; o mesmo código roda em PostgreSQL e SQLite. |
-| Banco de dados | **PostgreSQL (Neon)** | SGBD popular e robusto; o Neon tem plano gratuito e integração com o Vercel. |
+| Banco de dados | **PostgreSQL (Neon)** | SGBD popular e robusto; o Neon tem plano gratuito, sem prazo de expiração. |
 | Front-end | **HTML5 + CSS3 + JavaScript puro** | Sem *framework* e sem etapa de *build*; renderizado no servidor por templates Jinja2. |
-| Hospedagem | **Vercel** (função *serverless* Python) | Deploy automático a cada `git push`, HTTPS e domínio gratuitos. |
+| Hospedagem | **Render** (Web Service Python + gunicorn) | Plano gratuito, deploy automático a cada `git push`, HTTPS e domínio gratuitos. Compatível também com Vercel (`vercel.json`). |
 | Testes | **pytest** + **pytest-cov** + **Playwright** | Unidade, integração e ponta a ponta em navegador real. |
 | Modo de codificação | **Tradicional** | Todo o código foi escrito à mão, sem *low-code* ou *no-code*. |
 
@@ -49,11 +49,12 @@ projeto_faculdade/
 │   ├── controllers/             # C: auth, dashboard, clientes, servicos, profissionais, agendamentos, feedback
 │   ├── views/                   # V: templates Jinja2
 │   └── static/                  # V: css/, js/, img/
-├── api/index.py                 # ponto de entrada da função serverless do Vercel
+├── wsgi.py                      # ponto de entrada WSGI (gunicorn, no Render)
+├── api/index.py                 # ponto de entrada alternativo (função serverless do Vercel)
 ├── tests/                       # pytest: unidade, integração e e2e/
 ├── scripts/gerar_schema.py      # gera docs/situacao-1/schema.sql a partir dos Models
 ├── docs/                        # documentação organizada por Situação-Problema
-├── vercel.json                  # rotas e configuração do Vercel
+├── vercel.json                  # configuração do Vercel (alternativa)
 ├── requirements.txt             # dependências de produção
 └── requirements-dev.txt         # + dependências de teste
 ```
@@ -101,4 +102,4 @@ projeto_faculdade/
 | Upload malicioso | Tipo verificado pela assinatura binária (não pela extensão), limite de 2 MB |
 | Enumeração de usuários | Login responde "E-mail ou senha incorretos" sem dizer qual |
 | Contas indevidas | `CADASTRO_ABERTO=0` fecha o cadastro após o período de testes |
-| Segredos no código | `SECRET_KEY` e `DATABASE_URL` só em variáveis de ambiente; a aplicação recusa iniciar no Vercel sem elas |
+| Segredos no código | `SECRET_KEY` e `DATABASE_URL` só em variáveis de ambiente; a aplicação recusa iniciar em produção (Render/Vercel) sem elas |

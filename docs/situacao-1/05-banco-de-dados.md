@@ -2,7 +2,7 @@
 
 O projeto de dados parte do diagrama de classes de persistência ([03-modelagem-uml.md](03-modelagem-uml.md)), como pede a Situação-Problema 1, e passa pelos três níveis: conceitual, lógico normalizado e físico.
 
-- **SGBD**: PostgreSQL 16+ (Neon, gerenciado). Popular, gratuito, de fácil manutenção e com suporte nativo no Vercel.
+- **SGBD**: PostgreSQL 16+ (Neon, gerenciado). Popular, gratuito, de fácil manutenção e com integração ao Render e ao Vercel.
 - **Acesso**: SQLAlchemy (ORM). O mesmo código roda em PostgreSQL (produção) e SQLite (testes automatizados).
 
 ## 5.1 Modelo conceitual (entidade-relacionamento)

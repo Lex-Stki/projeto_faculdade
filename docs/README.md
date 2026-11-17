@@ -13,7 +13,7 @@ Organizada conforme as três Situações-Problema do Projeto Integrador Transdis
 ## Situação 2: Desenvolver a solução
 1. [Arquitetura MVC](situacao-2/01-arquitetura.md): tecnologias, camadas, rotas, tratamento de erros, segurança
 2. [Manual de uso](situacao-2/02-manual-de-uso.md)
-3. [Instalação e deploy](situacao-2/03-instalacao-e-deploy.md): local e Vercel + Neon
+3. [Instalação e deploy](situacao-2/03-instalacao-e-deploy.md): local e Render + Neon
 4. [Testes automatizados](situacao-2/04-testes-automatizados.md): Modelo V, pytest, Playwright, cobertura
 
 ## Situação 3: Testar, validar e corrigir

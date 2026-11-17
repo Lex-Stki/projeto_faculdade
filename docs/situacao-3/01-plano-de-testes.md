@@ -19,8 +19,9 @@
 
 > Oi! Estou terminando meu Projeto Integrador e preciso que você teste meu sistema por uns 15 minutos.
 > É um sistema de agendamento para salão/barbearia.
-> 1) Acesse **https://SEU-PROJETO.vercel.app**, crie uma conta e use como se fosse dono(a) de um salão (o roteiro abaixo ajuda).
-> 2) No final, preencha o laudo em **https://SEU-PROJETO.vercel.app/feedback**. Pode mandar print dos erros!
+> (A primeira abertura pode demorar uns 50 segundos: o servidor gratuito "acorda". Depois fica rápido.)
+> 1) Acesse **https://SEU-SERVICO.onrender.com**, crie uma conta e use como se fosse dono(a) de um salão (o roteiro abaixo ajuda).
+> 2) No final, preencha o laudo em **https://SEU-SERVICO.onrender.com/feedback**. Pode mandar print dos erros!
 > Pode ser bem sincero(a): os erros que você achar vão me ajudar a melhorar a nota. Obrigado!
 
 ## 1.3 Roteiro de casos de teste (para os testadores)
@@ -57,5 +58,5 @@ O roteiro também aparece recolhido no formulário de laudo ("Sugestão de rotei
 1. Ler os laudos (menu **Laudos**) e exportar em CSV.
 2. Classificar cada item: defeito (alta, média ou baixa), sugestão (aceita ou recusada, com motivo) ou fora do escopo.
 3. Para cada defeito: reproduzir → **escrever um teste automatizado que falha** → corrigir → ver o teste passar → registrar no laudo de qualidade (seção 3.4).
-4. `git push` → o Vercel publica → pedir ao testador que confira, quando possível.
+4. `git push` → o Render publica → pedir ao testador que confira, quando possível.
 5. Gravar o vídeo da solução atualizada mostrando as mudanças.

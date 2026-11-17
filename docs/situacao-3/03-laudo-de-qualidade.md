@@ -5,15 +5,15 @@
 | Sistema | AgendaFácil: agendamento para negócios de serviços |
 | Versão avaliada | 2.2 (branch `main`) |
 | Ambiente de verificação | Windows 11, Python 3.13, SQLite em memória (testes), Microsoft Edge (E2E) |
-| Ambiente de produção | Vercel (Python 3.12) + PostgreSQL (Neon) |
+| Ambiente de produção | Render (Python 3.12, gunicorn) + PostgreSQL (Neon) |
 | Data da verificação interna | 17/11/2026 |
 
 ## 3.1 Resumo
 
 | Indicador | Resultado |
 |---|---|
-| Testes automatizados | **116 aprovados / 0 falhas** (74 unidade, 40 integração, 2 cenários E2E) |
-| Cobertura de código | **93 %** |
+| Testes automatizados | **118 aprovados / 0 falhas** (76 unidade, 40 integração, 2 cenários E2E) |
+| Cobertura de código | **94 %** |
 | Defeitos encontrados na verificação interna | 5 (1 alta, 2 médias, 2 baixas) |
 | Defeitos corrigidos | 5 de 5, cada um com teste de regressão |
 | Erros de JavaScript no navegador durante o E2E | 0 |

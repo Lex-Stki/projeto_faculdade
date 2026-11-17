@@ -15,14 +15,14 @@ Dica: grave a tela com o **Xbox Game Bar** (Win + G) ou o **OBS Studio**, publiq
 |---|---|---|
 | 0:00–0:40 | README no GitHub | Apresentação: nome, RGM, o problema (agenda em caderno ou WhatsApp, horários duplicados) e a solução AgendaFácil. |
 | 0:40–1:30 | `docs/` no GitHub (requisitos, diagrama de classes, banco) | Revisão da Situação 1: regras de negócio numeradas, UML, modelo do banco e dicionário de dados. |
-| 1:30–2:30 | VS Code: pastas `models/`, `controllers/`, `views/` | Arquitetura MVC: o Model guarda as regras (abrir `Agendamento.definir`), o Controller recebe a requisição, a View mostra o HTML. Python + Flask, PostgreSQL no Neon, hospedado no Vercel. |
+| 1:30–2:30 | VS Code: pastas `models/`, `controllers/`, `views/` | Arquitetura MVC: o Model guarda as regras (abrir `Agendamento.definir`), o Controller recebe a requisição, a View mostra o HTML. Python + Flask, PostgreSQL no Neon, hospedado no Render. |
 | 2:30–3:00 | Site no ar: criar conta | Primeira conta vira administradora; carregar dados de exemplo. |
 | 3:00–3:30 | Clientes | Cadastro com máscara de telefone, validação de campo obrigatório, busca, "Salvar e agendar". |
 | 3:30–4:30 | Novo agendamento | Término previsto, horários ocupados. Tentar um **conflito**, **domingo** e **19:30** e ler as mensagens. Salvar um válido. |
 | 4:30–5:15 | Agenda | Filtros; Remarcar; Cancelar (diálogo) e Reabrir; tentar concluir um atendimento futuro. |
 | 5:15–5:45 | Serviços | Desativar um serviço e mostrar que ele some do agendamento; tentar excluir um serviço já usado. |
 | 5:45–6:15 | Celular (F12 → modo dispositivo) | Layout responsivo. |
-| 6:15–7:00 | Terminal: `pytest --cov=agendafacil` | 116 testes passando e 93% de cobertura; mostrar um teste de regra de negócio e o teste E2E. |
+| 6:15–7:00 | Terminal: `pytest --cov=agendafacil` | 118 testes passando e 94% de cobertura; mostrar um teste de regra de negócio e o teste E2E. |
 | 7:00–7:30 | Formulário `/feedback` | Como os colegas vão testar e enviar o laudo com captura de tela. Encerramento. |
 
 ## Vídeo 2: Solução atualizada (≤ 5 min)

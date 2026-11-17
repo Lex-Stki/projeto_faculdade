@@ -1,6 +1,6 @@
 """Configuração da aplicação, lida de variáveis de ambiente.
 
-Em produção (Vercel) são obrigatórias:
+Em produção (Render ou Vercel) são obrigatórias:
   - SECRET_KEY    -> chave para assinar o cookie de sessão
   - DATABASE_URL  -> URL do PostgreSQL (Neon). POSTGRES_URL também é aceita.
 
@@ -28,7 +28,8 @@ def cadastro_aberto() -> bool:
 
 
 def em_producao() -> bool:
-    return bool(os.environ.get("VERCEL"))
+    """True quando roda no Render ou no Vercel (as duas plataformas definem estas variáveis)."""
+    return bool(os.environ.get("RENDER") or os.environ.get("VERCEL"))
 
 
 def url_banco() -> str:
@@ -40,8 +41,8 @@ def url_banco() -> str:
         return url
     if em_producao():
         raise RuntimeError(
-            "DATABASE_URL não configurada. No Vercel, conecte um banco Neon em "
-            "Storage ou crie a variável DATABASE_URL em Settings > Environment Variables."
+            "DATABASE_URL não configurada. Crie a variável DATABASE_URL com a URL do PostgreSQL (Neon) "
+            "nas variáveis de ambiente da hospedagem (Render: Environment; Vercel: Settings > Environment Variables)."
         )
     pasta = BASE_DIR / "instance"
     pasta.mkdir(exist_ok=True)
@@ -54,7 +55,8 @@ def chave_secreta() -> str:
         return chave
     if em_producao():
         raise RuntimeError(
-            "SECRET_KEY não configurada. Crie a variável em Settings > Environment Variables no Vercel."
+            "SECRET_KEY não configurada. Crie a variável nas variáveis de ambiente da hospedagem "
+            "(Render: Environment; Vercel: Settings > Environment Variables)."
         )
     return secrets.token_hex(32)
 

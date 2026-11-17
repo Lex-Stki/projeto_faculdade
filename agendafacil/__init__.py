@@ -8,9 +8,10 @@ Arquitetura MVC:
 """
 from flask import Flask, g, render_template, session
 from werkzeug.exceptions import HTTPException
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 from . import utils
-from .config import montar_config
+from .config import em_producao, montar_config
 from .extensions import db
 from .models import STATUS_AGENDAMENTO, Usuario
 
@@ -35,6 +36,10 @@ MENSAGENS_ERRO = {
 def create_app(sobrescrever: dict | None = None) -> Flask:
     app = Flask(__name__, template_folder="views", static_folder="static")
     app.config.update(montar_config(sobrescrever))
+    if em_producao():
+        # Render e Vercel ficam atrás de um proxy HTTPS: confia nos cabeçalhos X-Forwarded-*
+        # para que url_for(..., _external=True) gere links https:// com o domínio público.
+        app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
 
     db.init_app(app)
     _registrar_blueprints(app)
