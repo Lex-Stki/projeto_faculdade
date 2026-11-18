@@ -1,6 +1,6 @@
 from datetime import datetime, time, timedelta
 
-from ..config import DIAS_FECHADOS, HORA_ABERTURA, HORA_FECHAMENTO
+from ..config import DIAS_FECHADOS, HORA_ABERTURA, HORA_FECHAMENTO, INTERVALO_HORARIOS_MIN
 from ..extensions import db
 from ..utils import agora, parse_data, parse_hora, parse_int
 from .cliente import Cliente
@@ -160,6 +160,49 @@ class Agendamento(db.Model):
         if ignorar_id is not None:
             consulta = consulta.filter(Agendamento.id != ignorar_id)
         return consulta.order_by(Agendamento.inicio)
+
+    @staticmethod
+    def horarios_do_dia(data, duracao_min: int | None = None, profissional_id=None, cliente_id=None,
+                        ignorar_id=None, referencia: datetime | None = None) -> list[dict]:
+        """Horários de início possíveis no dia, de INTERVALO_HORARIOS_MIN em INTERVALO_HORARIOS_MIN minutos.
+
+        Cada item diz se o horário está livre e, se não estiver, o motivo, para a tela mostrar
+        a indisponibilidade antes de o usuário salvar (sugestão dos testadores Bruno e Vitória;
+        corrige o defeito D7 relatado por Robson). Aplica as mesmas regras RN01–RN05 de `definir()`.
+        """
+        if data is None or data.weekday() in DIAS_FECHADOS:
+            return []
+        referencia = referencia or agora()
+        duracao = timedelta(minutes=duracao_min or INTERVALO_HORARIOS_MIN)
+        passo = timedelta(minutes=INTERVALO_HORARIOS_MIN)
+        abertura = datetime.combine(data, time(HORA_ABERTURA))
+        fechamento = datetime.combine(data, time(HORA_FECHAMENTO))
+
+        with db.session.no_autoflush:
+            do_profissional = (Agendamento.conflitos(abertura, fechamento, profissional_id=profissional_id,
+                                                     ignorar_id=ignorar_id).all() if profissional_id else [])
+            do_cliente = (Agendamento.conflitos(abertura, fechamento, cliente_id=cliente_id,
+                                                ignorar_id=ignorar_id).all() if cliente_id else [])
+
+        horarios = []
+        inicio = abertura
+        while inicio + duracao <= fechamento:
+            fim = inicio + duracao
+            motivo = None
+            if inicio < referencia:
+                motivo = "horário já passou"
+            else:
+                choque = next((a for a in do_profissional if a.inicio < fim and a.fim > inicio), None)
+                if choque:
+                    motivo = f"{choque.profissional.nome} ocupado(a) {choque.inicio:%H:%M}–{choque.fim:%H:%M}"
+                else:
+                    choque = next((a for a in do_cliente if a.inicio < fim and a.fim > inicio), None)
+                    if choque:
+                        motivo = f"cliente já agendado(a) {choque.inicio:%H:%M}–{choque.fim:%H:%M}"
+            horarios.append({"hora": f"{inicio:%H:%M}", "fim": f"{fim:%H:%M}",
+                             "livre": motivo is None, "motivo": motivo})
+            inicio += passo
+        return horarios
 
     def alterar_status(self, novo: str, referencia: datetime | None = None) -> str | None:
         """Muda o status. Retorna mensagem de erro ou None se deu certo."""

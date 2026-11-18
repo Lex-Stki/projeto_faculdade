@@ -24,6 +24,10 @@ SALVAR = bool(os.environ.get("E2E_EVIDENCIAS"))
 SEGUNDA = "2030-01-07"
 
 
+class _Url(str):
+    """Texto da URL do servidor de teste que também carrega o app Flask (atributo .app)."""
+
+
 @pytest.fixture(scope="module")
 def servidor(tmp_path_factory):
     banco = tmp_path_factory.mktemp("e2e") / "e2e.db"
@@ -32,7 +36,9 @@ def servidor(tmp_path_factory):
     srv = make_server("127.0.0.1", 0, app, threaded=True)
     thread = threading.Thread(target=srv.serve_forever, daemon=True)
     thread.start()
-    yield f"http://127.0.0.1:{srv.server_port}"
+    url = _Url(f"http://127.0.0.1:{srv.server_port}")
+    url.app = app  # para os testes que precisam gravar dados direto no banco
+    yield url
     srv.shutdown()
 
 
@@ -113,27 +119,44 @@ def test_fluxo_completo(servidor, pagina):
     page.select_option("#servico_id", label="Corte feminino · 60 min · R$ 80,00")
     page.select_option("#profissional_id", index=1)
     page.fill("#data", SEGUNDA)
-    page.fill("#hora", "10:00")
     page.dispatch_event("#data", "change")
-    assert page.locator("#previsao-termino").inner_text() == "Término previsto: 11:00 (60 min)"
     page.wait_for_selector("#painel-disponibilidade:has-text('livre o dia todo')")
+    # Lista de horários de 10 em 10 min (defeito D7: antes era um campo de hora que aceitava 15:34
+    # na tela e depois recusava com "Valor inválido.")
+    valores = page.eval_on_selector_all("#hora option", "ops => ops.map(o => o.value).filter(Boolean)")
+    assert valores[:4] == ["08:00", "08:10", "08:20", "08:30"]
+    assert valores[-1] == "19:00"  # serviço de 60 min precisa terminar até 20:00
+    page.select_option("#hora", "10:00")
+    assert page.locator("#previsao-termino").inner_text() == "Término previsto: 11:00 (60 min)"
     evidencia(page, "04-formulario-agendamento")
     page.click("button:has-text('Salvar agendamento')")
     assert "Agendamento criado para 07/01/2030 às 10:00." in alerta(page)
     evidencia(page, "05-agenda-do-dia")
 
-    # 5. Conflito de horário: mensagem do servidor e painel de horários ocupados
+    # 5. Indisponibilidade mostrada ANTES de salvar (sugestões de Bruno e Vitória)
     page.goto(servidor + "/agendamentos/novo")
-    page.select_option("#cliente_id", index=1)
-    page.select_option("#servico_id", index=2)
-    page.select_option("#profissional_id", index=1)
+    page.select_option("#cliente_id", label="Fernanda Costa · (11) 3333-4444")
+    page.select_option("#servico_id", index=2)          # Coloração, 120 min
+    page.select_option("#profissional_id", index=2)     # Bruno: livre
     page.fill("#data", SEGUNDA)
     page.dispatch_event("#data", "change")
+    page.wait_for_selector("#painel-disponibilidade:has-text('livre o dia todo')")
+    page.select_option("#hora", "09:00")
+    page.select_option("#profissional_id", index=1)     # troca para Ana, ocupada 10:00–11:00
     page.wait_for_selector("#painel-disponibilidade li:has-text('10:00–11:00')")
-    page.fill("#hora", "10:30")
-    page.click("button:has-text('Salvar agendamento')")
-    assert "já tem atendimento das 10:00 às 11:00" in alerta(page)
-    evidencia(page, "06-conflito-de-horario")
+    aviso = page.locator(".aviso-horario").inner_text()
+    assert aviso == "O horário 09:00 não está mais disponível com estas escolhas. Selecione outro."
+    opcao = page.locator("#hora option[value='09:00']")
+    assert opcao.is_disabled()
+    assert "indisponível: Ana Souza ocupado(a) 10:00–11:00" in opcao.inner_text()
+    assert page.locator("#hora option[value='08:00']").is_enabled()   # 08:00–10:00 encosta, não conflita
+    assert page.locator("#hora option[value='11:00']").is_enabled()
+    # Para a captura, exibe a lista aberta em volta das 09:00
+    page.eval_on_selector("#hora", """el => { el.size = 9;
+        const i = [...el.options].findIndex(o => o.value === '08:30');
+        el.scrollTop = el.options[i].offsetTop - el.offsetTop; }""")
+    evidencia(page, "06-indisponibilidade-antes-de-salvar")
+    page.eval_on_selector("#hora", "el => { el.size = 0; }")
 
     # 6. Cancelar com diálogo de confirmação e depois reabrir (ação reversível)
     page.goto(servidor + f"/agendamentos/?data={SEGUNDA}")
@@ -175,3 +198,63 @@ def test_pagina_404_amigavel(servidor, pagina):
     assert resposta.status == 404
     assert "Página não encontrada" in pagina.inner_text("h1")
     evidencia(pagina, "10-erro-404", pagina_inteira=False)
+
+
+def test_painel_de_vendas(servidor, pagina):
+    """Indicadores e gráficos de vendas (sugestão da testadora Vitória), claro/escuro/celular."""
+    from datetime import timedelta
+
+    from agendafacil.extensions import db
+    from agendafacil.models import Agendamento, Cliente, Profissional, Servico, Usuario
+    from agendafacil.seed import popular
+    from agendafacil.utils import agora
+
+    with servidor.app.app_context():
+        popular()
+        if not Usuario.query.filter_by(email="vendas@salao.com").first():
+            u = Usuario(nome="Gerente Vendas", email="vendas@salao.com", perfil="admin")
+            u.definir_senha("123456")
+            db.session.add(u)
+        servicos = Servico.query.order_by(Servico.nome).all()
+        profs = Profissional.query.order_by(Profissional.nome).all()
+        clientes = Cliente.query.order_by(Cliente.nome).all()
+        base = agora().replace(hour=9, minute=0, second=0)
+        # (dias atrás, quantidade de atendimentos concluídos nesse dia)
+        for dias_atras, qtd in [(6, 2), (5, 3), (4, 1), (3, 4), (2, 2), (1, 5), (0, 1)]:
+            for k in range(qtd):
+                s = servicos[(dias_atras + k) % len(servicos)]
+                inicio = base - timedelta(days=dias_atras) + timedelta(minutes=10 * k)
+                db.session.add(Agendamento(
+                    cliente_id=clientes[k % len(clientes)].id, servico_id=s.id,
+                    profissional_id=profs[k % len(profs)].id, inicio=inicio,
+                    fim=inicio + timedelta(minutes=5), preco=s.preco, status="concluido"))
+        db.session.commit()
+
+    page = pagina
+    page.goto(servidor + "/login")
+    page.fill("#email", "vendas@salao.com")
+    page.fill("#senha", "123456")
+    page.click("button[type=submit]")
+    assert page.locator(".grafico-faixa").count() == 7
+    assert page.locator(".grafico-coluna").count() == 7
+    assert page.locator(".grafico-rotulo").count() == 1          # rótulo só no maior dia
+    assert page.locator(".grafico-ranking li").count() == 5      # top 5 serviços
+    coluna = page.locator(".grafico-faixa").nth(5)
+    coluna.scroll_into_view_if_needed()
+    page.wait_for_timeout(150)  # a dica some ao rolar a página; passa o mouse depois da rolagem
+    coluna.hover()
+    assert page.locator(".dica").is_visible()
+    assert "atendimento(s)" in page.locator(".dica").inner_text()
+    page.locator(".tabela-dados summary").click()
+    assert page.locator(".tabela-dados tbody tr").count() == 7
+    page.locator("#titulo-vendas").scroll_into_view_if_needed()
+    if SALVAR:
+        PASTA_EVIDENCIAS.mkdir(parents=True, exist_ok=True)
+        page.locator(".vendas").screenshot(path=str(PASTA_EVIDENCIAS / "12-painel-vendas.png"))
+        page.emulate_media(color_scheme="dark")
+        page.locator(".vendas").screenshot(path=str(PASTA_EVIDENCIAS / "13-painel-vendas-escuro.png"))
+        page.emulate_media(color_scheme="light")
+        page.set_viewport_size({"width": 390, "height": 844})
+        page.locator(".vendas").screenshot(path=str(PASTA_EVIDENCIAS / "14-painel-vendas-celular.png"))
+        page.goto(servidor + "/agendamentos/novo")
+        page.screenshot(path=str(PASTA_EVIDENCIAS / "15-agendamento-no-celular.png"), full_page=True)

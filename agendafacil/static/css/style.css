@@ -17,6 +17,8 @@
   --cor-aviso-suave: #fff4d6;
   --cor-info-suave: #e8eef9;
   --cor-info: #234c8c;
+  --cor-grafico: #118e77;       /* série única; validada: L/croma/contraste ok vs #ffffff */
+  --cor-grade: #ebe8e2;
   --raio: 10px;
   --sombra: 0 1px 2px rgba(0, 0, 0, .06), 0 2px 8px rgba(0, 0, 0, .04);
   --fonte: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -38,6 +40,8 @@
     --cor-aviso-suave: #3a3020;
     --cor-info-suave: #1f2a3d;
     --cor-info: #9cbcf0;
+    --cor-grafico: #1ca288;     /* passo escuro próprio, validado vs #1e2226 */
+    --cor-grade: #2c3136;
     --sombra: none;
   }
 }
@@ -216,3 +220,83 @@ input:focus, select:focus, textarea:focus { border-color: var(--cor-primaria); o
 /* ------------------------------------------------------------ diálogo de confirmação */
 .dialogo { border: 0; border-radius: var(--raio); padding: 1.5rem; max-width: 420px; width: calc(100% - 2rem); background: var(--cor-superficie); color: var(--cor-texto); }
 .dialogo::backdrop { background: rgba(0, 0, 0, .45); }
+
+/* ------------------------------------------------------------ disponibilidade (feedback antes de salvar) */
+.disponibilidade-alerta { background: var(--cor-aviso-suave); border-left: 4px solid var(--cor-aviso); }
+.aviso-horario { margin: 0 0 .5rem; color: var(--cor-perigo); font-weight: 600; }
+select option:disabled { color: var(--cor-texto-suave); }
+
+/* ------------------------------------------------------------ celular (relato do testador Robson) */
+@media (max-width: 560px) {
+  .conteudo { padding: 1rem .75rem 2rem; }
+  .cartao { padding: 1rem; }
+  h1 { font-size: 1.4rem; }
+  /* botões maiores e mais fáceis de tocar (mínimo de 44 px) */
+  .botao { min-height: 44px; }
+  .botao-pequeno { min-height: 40px; padding: .45rem .8rem; }
+  .cabecalho-pagina > .botao, .cabecalho-pagina .acoes { width: 100%; }
+  .cabecalho-pagina > .botao { justify-content: center; }
+  .acoes { justify-content: stretch; }
+  .acoes > .botao, .acoes > .form-inline, .acoes > .form-inline .botao { flex: 1 1 auto; }
+  .barra-filtros > * { flex: 1 1 100%; }
+  .barra-filtros input[type="search"] { min-width: 0; }
+  .campo-compacto { min-width: 0; }
+  .indicador-valor { font-size: 1.3rem; }
+}
+
+/* ------------------------------------------------------------ vendas: gráficos (sugestão da testadora Vitória) */
+.indicadores-3 { grid-template-columns: repeat(3, 1fr); }
+@media (max-width: 760px) { .indicadores-3 { grid-template-columns: 1fr; } }
+.titulo-grafico { font-size: 1rem; margin: 1.25rem 0 .75rem; }
+.grafico-colunas { --altura: 180px; padding-left: 4.5rem; padding-top: 1.5rem; }
+.grafico-area { position: relative; height: var(--altura); }
+.grafico-grade { position: absolute; left: 0; right: 0; border-top: 1px solid var(--cor-grade); }
+.grafico-grade span {
+  position: absolute; right: 100%; transform: translateY(-50%); padding-right: .5rem;
+  font-size: .75rem; color: var(--cor-texto-suave); white-space: nowrap; font-variant-numeric: tabular-nums;
+}
+.grafico-barras { position: absolute; inset: 0; display: grid; grid-template-columns: repeat(7, 1fr); }
+.grafico-faixa { position: relative; display: flex; align-items: flex-end; justify-content: center; cursor: default; outline-offset: -2px; }
+.grafico-coluna {
+  width: min(24px, 60%); background: var(--cor-grafico);
+  border-radius: 4px 4px 0 0; min-height: 2px; transition: filter .15s;
+}
+.grafico-faixa:hover .grafico-coluna, .grafico-faixa:focus-visible .grafico-coluna { filter: brightness(1.15); }
+.grafico-rotulo {
+  position: absolute; left: 50%; transform: translate(-50%, -.35rem); font-size: .75rem; font-weight: 600;
+  color: var(--cor-texto); white-space: nowrap;
+}
+.grafico-eixo-x { display: grid; grid-template-columns: repeat(7, 1fr); margin-top: .4rem; }
+.grafico-eixo-x span { text-align: center; font-size: .75rem; line-height: 1.25; color: var(--cor-texto-suave); }
+.grafico-eixo-x .hoje { font-weight: 700; color: var(--cor-texto); }
+.tabela-dados { margin-top: .75rem; }
+.tabela-dados summary { cursor: pointer; color: var(--cor-primaria); font-size: .9rem; }
+.tabela-dados .tabela { margin-top: .5rem; }
+.grafico-ranking { list-style: none; margin: 0; padding: 0; display: grid; gap: .5rem; }
+.grafico-ranking li { display: grid; grid-template-columns: minmax(7rem, 12rem) 1fr auto; gap: .75rem; align-items: center; padding: .15rem 0; }
+.ranking-nome { font-size: .9rem; overflow-wrap: anywhere; }
+.ranking-trilho { height: 12px; }
+.ranking-barra { display: block; height: 100%; background: var(--cor-grafico); border-radius: 0 4px 4px 0; min-width: 2px; }
+.grafico-ranking li:hover .ranking-barra, .grafico-ranking li:focus-visible .ranking-barra { filter: brightness(1.15); }
+.ranking-valor { font-size: .9rem; font-variant-numeric: tabular-nums; }
+@media (max-width: 560px) {
+  .grafico-colunas { padding-left: 3.75rem; }
+  .grafico-ranking li { grid-template-columns: 1fr auto; }
+  .grafico-ranking .ranking-trilho { grid-column: 1 / -1; grid-row: 2; }
+}
+.dica {
+  position: fixed; z-index: 20; pointer-events: none; background: var(--cor-superficie); color: var(--cor-texto);
+  border: 1px solid var(--cor-borda); border-radius: 8px; padding: .4rem .6rem; box-shadow: 0 4px 14px rgba(0,0,0,.15);
+  font-size: .85rem; line-height: 1.3;
+}
+.dica strong { display: block; font-size: 1rem; }
+.dica span { color: var(--cor-texto-suave); }
+
+/* Tabela pequena que continua tabela no celular (não vira cartões) */
+@media (max-width: 760px) {
+  .tabela.tabela-fixa { display: table; }
+  .tabela.tabela-fixa thead { display: table-header-group; }
+  .tabela.tabela-fixa tbody { display: table-row-group; }
+  .tabela.tabela-fixa tr { display: table-row; padding: 0; }
+  .tabela.tabela-fixa th, .tabela.tabela-fixa td { display: table-cell; width: auto; padding: .45rem .6rem; border-bottom: 1px solid var(--cor-borda); }
+}

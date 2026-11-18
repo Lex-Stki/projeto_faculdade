@@ -42,6 +42,39 @@ def _opcoes(agendamento: Agendamento | None = None) -> dict:
     }
 
 
+def _primeira_data_com_horario():
+    """Data padrão do novo agendamento: hoje, ou o próximo dia que ainda tenha horário livre
+    (depois do expediente ou no domingo, abrir em "hoje" mostrava uma lista vazia; defeito D8)."""
+    dia = hoje()
+    for _ in range(14):
+        if any(h["livre"] for h in Agendamento.horarios_do_dia(dia)):
+            return dia
+        dia += timedelta(days=1)
+    return hoje()
+
+
+def _horarios(dados, ignorar_id=None) -> list[dict]:
+    """Lista de horários do <select> conforme o que já está escolhido no formulário.
+
+    Renderizada no servidor para funcionar mesmo sem JavaScript; o agendamento.js a atualiza
+    sempre que data, serviço, profissional ou cliente mudam.
+    """
+    servico = db.session.get(Servico, parse_int(dados.get("servico_id"), 0))
+    horarios = Agendamento.horarios_do_dia(
+        parse_data(dados.get("data")),
+        duracao_min=servico.duracao_min if servico else None,
+        profissional_id=parse_int(dados.get("profissional_id")),
+        cliente_id=parse_int(dados.get("cliente_id")),
+        ignorar_id=ignorar_id,
+    )
+    hora = (dados.get("hora") or "")[:5]
+    if hora and all(h["hora"] != hora for h in horarios):
+        # horário fora da grade (ex.: agendamento antigo às 08:35): mantém a opção para não perdê-lo
+        horarios.append({"hora": hora, "fim": "", "livre": True, "motivo": None})
+        horarios.sort(key=lambda h: h["hora"])
+    return horarios
+
+
 @bp.route("/")
 @login_obrigatorio
 def lista():
@@ -80,7 +113,7 @@ def lista():
 def novo():
     dados = {
         "cliente_id": request.args.get("cliente_id", ""),
-        "data": request.args.get("data") or hoje().isoformat(),
+        "data": request.args.get("data") or _primeira_data_com_horario().isoformat(),
         "hora": "",
     }
     if request.method == "POST":
@@ -95,7 +128,7 @@ def novo():
             flash(erro, "erro")
         dados = request.form
     return render_template("agendamentos/form.html", dados=dados, agendamento=None,
-                           titulo="Novo agendamento", **_opcoes())
+                           titulo="Novo agendamento", horarios=_horarios(dados), **_opcoes())
 
 
 @bp.route("/<int:agendamento_id>/editar", methods=["GET", "POST"])
@@ -124,7 +157,8 @@ def editar(agendamento_id):
             flash(erro, "erro")
         dados = request.form
     return render_template("agendamentos/form.html", dados=dados, agendamento=agendamento,
-                           titulo="Editar agendamento", **_opcoes(agendamento))
+                           titulo="Editar agendamento", horarios=_horarios(dados, agendamento.id),
+                           **_opcoes(agendamento))
 
 
 @bp.route("/<int:agendamento_id>/status", methods=["POST"])
@@ -146,16 +180,21 @@ def alterar_status(agendamento_id):
 @bp.route("/disponibilidade")
 @login_obrigatorio
 def disponibilidade():
-    """JSON com os horários ocupados de um profissional em um dia (usado pelo formulário)."""
-    profissional_id = parse_int(request.args.get("profissional_id"))
+    """JSON usado pelo formulário: horários do dia (livres/bloqueados com motivo) e ocupação do profissional.
+
+    Parâmetros: data (obrigatório, AAAA-MM-DD), profissional_id, servico_id, cliente_id, ignorar.
+    """
     data = parse_data(request.args.get("data"))
-    if not profissional_id or not data:
-        return jsonify(erro="Informe profissional_id e data (AAAA-MM-DD)."), 400
-    inicio = datetime.combine(data, time.min)
-    ocupados = Agendamento.conflitos(
-        inicio, inicio + timedelta(days=1), profissional_id=profissional_id,
-        ignorar_id=parse_int(request.args.get("ignorar")),
-    ).options(joinedload(Agendamento.servico)).all()
+    if not data:
+        return jsonify(erro="Informe a data (AAAA-MM-DD)."), 400
+    profissional_id = parse_int(request.args.get("profissional_id"))
+    ignorar_id = parse_int(request.args.get("ignorar"))
+    ocupados = []
+    if profissional_id:
+        inicio = datetime.combine(data, time.min)
+        ocupados = Agendamento.conflitos(
+            inicio, inicio + timedelta(days=1), profissional_id=profissional_id, ignorar_id=ignorar_id,
+        ).options(joinedload(Agendamento.servico)).all()
     return jsonify(
         data=data.isoformat(),
         fechado=data.weekday() in DIAS_FECHADOS,
@@ -165,4 +204,5 @@ def disponibilidade():
             {"inicio": f"{a.inicio:%H:%M}", "fim": f"{a.fim:%H:%M}", "servico": a.servico.nome}
             for a in ocupados
         ],
+        horarios=_horarios(request.args, ignorar_id),
     )

@@ -53,9 +53,21 @@
     </div>
     <div class="grade-2">
       {{ m.campo('data', 'Data', dados, tipo='date', obrigatorio=true, attrs='min="' ~ hoje().isoformat() ~ '"') }}
-      {{ m.campo('hora', 'Horário de início', dados, tipo='time', obrigatorio=true,
-                 ajuda='Funcionamento: ' ~ abertura ~ ' às ' ~ fechamento ~ ', de segunda a sábado.',
-                 attrs='min="' ~ abertura ~ '" max="' ~ fechamento ~ '" step="300"') }}
+      <div class="campo">
+        <label for="hora">Horário de início <span class="obrigatorio" aria-hidden="true">*</span></label>
+        {% set livres = horarios | selectattr('livre') | list %}
+        <select id="hora" name="hora" required aria-describedby="hora-ajuda">
+          <option value="">{{ 'Selecione…' if livres else 'Nenhum horário livre neste dia' }}</option>
+          {% for h in horarios %}
+          <option value="{{ h.hora }}" data-fim="{{ h.fim }}"
+                  {% if not h.livre %}disabled{% endif %}
+                  {% if (dados.get('hora') or '')[:5] == h.hora %}selected{% endif %}>
+            {{ h.hora }}{% if not h.livre %} · indisponível: {{ h.motivo }}{% endif %}
+          </option>
+          {% endfor %}
+        </select>
+        <small id="hora-ajuda" class="ajuda">De 10 em 10 minutos. Funcionamento: {{ abertura }} às {{ fechamento }}, de segunda a sábado. Horários ocupados aparecem bloqueados com o motivo.</small>
+      </div>
     </div>
     <p id="previsao-termino" class="previsao" aria-live="polite"></p>
     <div id="painel-disponibilidade" class="disponibilidade" aria-live="polite" hidden></div>

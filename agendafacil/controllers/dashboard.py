@@ -5,6 +5,7 @@ from sqlalchemy import text
 
 from ..extensions import db
 from ..models import Agendamento, Cliente, Profissional, Servico
+from ..models.vendas import resumo_vendas
 from ..utils import admin_obrigatorio, agora, login_obrigatorio
 
 bp = Blueprint("dashboard", __name__)
@@ -37,7 +38,8 @@ def inicio():
     }
     sem_cadastros = Servico.query.count() == 0 or Profissional.query.count() == 0
     return render_template("dashboard.html", de_hoje=de_hoje, proximos=proximos,
-                           indicadores=indicadores, agora=momento, sem_cadastros=sem_cadastros)
+                           indicadores=indicadores, agora=momento, sem_cadastros=sem_cadastros,
+                           vendas=resumo_vendas(momento.date()))
 
 
 @bp.route("/dados-exemplo", methods=["POST"])

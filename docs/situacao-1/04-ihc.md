@@ -8,7 +8,7 @@
 | **Consistente** | Todas as telas de cadastro seguem o mesmo padrão: trilha de navegação, título, campos, botões "Cancelar" (secundário) e "Salvar" (primário) à direita. Cores fixas por significado: verde = ação principal ou sucesso, vermelho = destrutivo ou erro, azul = informação. |
 | **Simples** | Somente o necessário em cada tela. Divulgação progressiva: o roteiro de teste fica recolhido em "Sugestão de roteiro"; o filtro "Período" só importa quando não há dia escolhido. |
 | **Controlada pelo usuário** | Nada acontece sozinho: as mensagens não somem sozinhas (ver defeito D2 no laudo); o usuário fecha quando quiser. |
-| **Direta** | Causa e efeito visíveis: ao escolher serviço e hora, aparece "Término previsto: 11:00 (60 min)"; ao escolher profissional e data, aparecem os horários ocupados. |
+| **Direta** | Causa e efeito visíveis: ao escolher serviço e hora, aparece "Término previsto: 11:00 (60 min)"; ao escolher data, serviço, profissional ou cliente, a lista de horários se atualiza e os indisponíveis aparecem bloqueados com o motivo, **antes** de salvar (melhoria pedida pelos testadores Bruno e Vitória). |
 | **Empática, recuperável e reversível** | Cancelar não apaga: o agendamento pode ser **reaberto**. Excluir pede confirmação. Itens com histórico são desativados em vez de excluídos. Em caso de erro, o formulário volta preenchido com o que foi digitado. |
 | **Dá resposta (feedback)** | Toda ação mostra uma mensagem (sucesso, erro ou aviso), anunciada a leitores de tela (`aria-live`). O botão de envio é desabilitado depois do clique para evitar envio duplicado. |
 | **Esteticamente agradável** | Paleta sóbria, cartões com bastante respiro, tipografia do sistema, ícone próprio e modo escuro automático (segue o sistema operacional). |
@@ -16,9 +16,9 @@
 
 ## 4.2 Elementos de interface usados
 
-- **Controles de entrada**: campos de texto, e-mail, telefone (com máscara), número, data, hora, listas suspensas, botões de opção (avaliação de 1 a 5), envio de arquivo.
+- **Controles de entrada**: campos de texto, e-mail, telefone (com máscara), número, data, lista de horários de 10 em 10 min (no lugar do seletor de hora livre, após o defeito D7), listas suspensas, botões de opção (avaliação de 1 a 5), envio de arquivo.
 - **Navegação**: menu principal com item atual destacado (`aria-current`), trilha de navegação ("Clientes › Editar cliente"), campo de pesquisa, paginação, menu recolhível no celular.
-- **Informativos**: alertas (sucesso, erro, aviso, info), selos de status (Agendado, Concluído, Cancelado), indicadores do painel, painel de disponibilidade, janela modal de confirmação.
+- **Informativos**: alertas (sucesso, erro, aviso, info), selos de status (Agendado, Concluído, Cancelado), indicadores do painel, painel de disponibilidade, janela modal de confirmação, gráficos de vendas com dicas (tooltips) e tabela com os dados.
 - **Recipientes**: cartões, tabelas que viram cartões no celular, lista do tipo linha do tempo.
 
 ## 4.3 Mapa de navegação
@@ -74,10 +74,13 @@ As capturas abaixo foram geradas automaticamente pelo teste ponta a ponta (`test
 | Validação de formulário | ![Validação](../situacao-3/evidencias/03-validacao-formulario.png) |
 | Novo agendamento com término previsto e disponibilidade | ![Agendamento](../situacao-3/evidencias/04-formulario-agendamento.png) |
 | Agenda do dia | ![Agenda](../situacao-3/evidencias/05-agenda-do-dia.png) |
-| Conflito de horário | ![Conflito](../situacao-3/evidencias/06-conflito-de-horario.png) |
+| Horários indisponíveis bloqueados antes de salvar | ![Indisponibilidade](../situacao-3/evidencias/06-indisponibilidade-antes-de-salvar.png) |
 | Confirmação antes de cancelar | ![Diálogo](../situacao-3/evidencias/07-dialogo-confirmacao.png) |
 | Celular | ![Celular](../situacao-3/evidencias/08-agenda-no-celular.png) |
 | Laudos recebidos (admin) | ![Laudos](../situacao-3/evidencias/09-laudos-recebidos.png) |
+| Painel de vendas | ![Vendas](../situacao-3/evidencias/12-painel-vendas.png) |
+| Painel de vendas (modo escuro) | ![Vendas escuro](../situacao-3/evidencias/13-painel-vendas-escuro.png) |
+| Agendamento no celular | ![Agendamento celular](../situacao-3/evidencias/15-agendamento-no-celular.png) |
 | Página de erro 404 | ![404](../situacao-3/evidencias/10-erro-404.png) |
 
 ## 4.6 Catálogo de mensagens
@@ -106,8 +109,17 @@ Toda mensagem diz **o que aconteceu** e, quando é erro, **o que fazer**.
 | RN14 | Telefone deve ter DDD + número (10 ou 11 dígitos). / Já existe um serviço com este nome. / Preço inválido. Use um valor como 35,00. |
 | Login | E-mail ou senha incorretos. *(não diz qual dos dois, por segurança)* |
 
+### Disponibilidade (no formulário, antes de salvar)
+| Situação | Mensagem |
+|---|---|
+| Horário ocupado na lista | 09:10 · indisponível: Ana Souza ocupado(a) 10:00–11:00 |
+| Cliente já agendado | 10:30 · indisponível: cliente já agendado(a) 10:00–11:00 |
+| Horário escolhido deixou de valer | O horário 09:00 não está mais disponível com estas escolhas. Selecione outro. |
+| Data sem horários | Não há mais horários disponíveis nesta data. Escolha outra data. |
+| Domingo | O estabelecimento não abre neste dia. Escolha outra data. |
+
 ### Erros de preenchimento (navegador, ao lado do campo)
-Campo obrigatório. · Digite um e-mail válido, ex.: nome@dominio.com. · Use pelo menos 6 caracteres. · As senhas não conferem. · Telefone com DDD, ex.: (11) 98765-4321. · O valor mínimo é 5. · A imagem deve ter no máximo 2 MB.
+Campo obrigatório. · Digite um e-mail válido, ex.: nome@dominio.com. · Use pelo menos 6 caracteres. · As senhas não conferem. · Telefone com DDD, ex.: (11) 98765-4321. · O valor mínimo é 5. · A imagem deve ter no máximo 2 MB. · Valor fora dos intervalos aceitos (de 5 em 5).
 
 ### Páginas de erro
 | Código | Título | Mensagem |

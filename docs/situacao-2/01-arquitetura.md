@@ -75,7 +75,7 @@ projeto_faculdade/
 | GET | `/agendamentos/` | agendamentos.lista (filtros `data`, `status`, `profissional_id`, `periodo`) | logado |
 | GET/POST | `/agendamentos/novo`, `/agendamentos/<id>/editar` | agendamentos | logado |
 | POST | `/agendamentos/<id>/status` | agendamentos.alterar_status | logado |
-| GET | `/agendamentos/disponibilidade` | agendamentos.disponibilidade (JSON) | logado |
+| GET | `/agendamentos/disponibilidade` | agendamentos.disponibilidade (JSON: horários livres ou bloqueados com motivo e ocupação; parâmetros `data`, `profissional_id`, `servico_id`, `cliente_id`, `ignorar`) | logado |
 | GET/POST | `/feedback/` | feedback.formulario | público |
 | GET | `/feedback/recebidos`, `/feedback/<id>/screenshot`, `/feedback/exportar.csv` | feedback | admin |
 | POST | `/feedback/<id>/excluir` | feedback.excluir | admin |

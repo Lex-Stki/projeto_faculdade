@@ -18,6 +18,37 @@
     botao.addEventListener("click", function () { botao.closest(".alerta").remove(); });
   });
 
+  // Dica (tooltip) dos gráficos: no passar do mouse e no foco do teclado. Usa textContent.
+  // Valor em destaque, rótulo depois. A tabela "Ver os dados em tabela" traz os mesmos números.
+  const marcas = document.querySelectorAll("[data-dica-valor]");
+  if (marcas.length) {
+    const dica = document.createElement("div");
+    dica.className = "dica";
+    dica.hidden = true;
+    const valor = document.createElement("strong");
+    const rotulo = document.createElement("span");
+    dica.append(valor, rotulo);
+    document.body.appendChild(dica);
+    const mostrar = function (alvo) {
+      valor.textContent = alvo.dataset.dicaValor;
+      rotulo.textContent = alvo.dataset.dicaRotulo || "";
+      dica.hidden = false;
+      const r = alvo.getBoundingClientRect();
+      const d = dica.getBoundingClientRect();
+      const x = Math.min(Math.max(8, r.left + r.width / 2 - d.width / 2), window.innerWidth - d.width - 8);
+      dica.style.left = x + "px";
+      dica.style.top = Math.max(8, r.top - d.height - 8) + "px";
+    };
+    const esconder = function () { dica.hidden = true; };
+    marcas.forEach(function (alvo) {
+      alvo.addEventListener("pointerenter", function () { mostrar(alvo); });
+      alvo.addEventListener("focus", function () { mostrar(alvo); });
+      alvo.addEventListener("pointerleave", esconder);
+      alvo.addEventListener("blur", esconder);
+    });
+    window.addEventListener("scroll", esconder, { passive: true });
+  }
+
   // Máscara de telefone: (11) 98765-4321
   function mascararTelefone(valor) {
     const d = valor.replace(/\D/g, "").slice(0, 11);
@@ -64,6 +95,8 @@
     if (v.rangeOverflow) return "O valor máximo é " + campo.max + ".";
     if (v.patternMismatch) return campo.dataset.mascara === "telefone"
       ? "Telefone com DDD, ex.: (11) 98765-4321." : "Formato inválido.";
+    if (v.stepMismatch) return "Valor fora dos intervalos aceitos (de " + campo.step + " em " + campo.step + ").";
+    if (v.badInput) return "Valor incompleto ou inválido. Confira o que foi digitado.";
     if (v.customError) return campo.validationMessage;
     if (!v.valid) return "Valor inválido.";
     return "";

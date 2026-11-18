@@ -18,9 +18,9 @@ O sistema organiza clientes, serviços, profissionais e a agenda e **impede auto
 - Conta de usuário com login; a primeira conta vira administradora.
 - Clientes: cadastro, busca por nome, telefone ou e-mail, ficha com histórico.
 - Serviços (duração e preço) e profissionais, que podem ser desativados em vez de apagados.
-- Agendamento com **término calculado**, **horários ocupados em tempo real** e bloqueio de conflito (profissional e cliente), passado, domingo e fora do horário.
+- Agendamento com **lista de horários de 10 em 10 min** que já mostra os **indisponíveis e o motivo** antes de salvar, **término calculado** e bloqueio de conflito (profissional e cliente), passado, domingo e fora do horário.
 - Agenda com filtros; remarcar, concluir, cancelar e **reabrir**.
-- Painel do dia: atendimentos, pendentes e receita prevista.
+- Painel do dia (atendimentos, pendentes, receita prevista) e **indicadores de vendas com gráficos**: faturamento dos últimos 7 dias, ticket médio e serviços mais vendidos.
 - Formulário público de **laudo de teste** com captura de tela, exportação em CSV.
 - Interface responsiva (celular e computador), acessível e com modo escuro automático.
 
@@ -32,7 +32,7 @@ O sistema organiza clientes, serviços, profissionais e a agenda e **impede auto
 | Banco de dados | **PostgreSQL** (Neon) via SQLAlchemy; SQLite nos testes |
 | Front-end | HTML5, CSS3 e JavaScript puro (templates Jinja2) |
 | Hospedagem | **Render** (Web Service Python com gunicorn); compatível também com Vercel |
-| Testes | pytest, pytest-cov, Playwright: **125 testes, 94% de cobertura** |
+| Testes | pytest, pytest-cov, Playwright: **149 testes, 94% de cobertura** |
 | Modo de codificação | Tradicional |
 
 ## Rodar localmente

@@ -26,10 +26,10 @@
 {% endif %}
 
 <section class="indicadores" aria-label="Resumo do dia">
-  <div class="indicador"><span class="indicador-valor">{{ indicadores.hoje }}</span><span>atendimentos hoje</span></div>
-  <div class="indicador"><span class="indicador-valor">{{ indicadores.pendentes_hoje }}</span><span>ainda a realizar</span></div>
-  <div class="indicador"><span class="indicador-valor">{{ indicadores.receita_hoje|moeda }}</span><span>previsto hoje</span></div>
-  <div class="indicador"><span class="indicador-valor">{{ indicadores.clientes }}</span><span>clientes cadastrados</span></div>
+  <div class="indicador"><span>Atendimentos hoje</span><span class="indicador-valor">{{ indicadores.hoje }}</span></div>
+  <div class="indicador"><span>Ainda a realizar hoje</span><span class="indicador-valor">{{ indicadores.pendentes_hoje }}</span></div>
+  <div class="indicador"><span>Previsto para hoje</span><span class="indicador-valor">{{ indicadores.receita_hoje|moeda }}</span></div>
+  <div class="indicador"><span>Clientes cadastrados</span><span class="indicador-valor">{{ indicadores.clientes }}</span></div>
 </section>
 
 <section class="cartao">
@@ -52,6 +52,68 @@
   </ul>
   {% else %}
   <p class="vazio">Nenhum atendimento para hoje. <a href="{{ url_for('agendamentos.novo') }}">Agendar agora</a>.</p>
+  {% endif %}
+</section>
+
+<section class="cartao vendas" aria-labelledby="titulo-vendas">
+  <h2 id="titulo-vendas">Vendas</h2>
+  <p class="subtitulo">Somente atendimentos <strong>concluídos</strong>. Marque “Concluir” na agenda para que entrem aqui.</p>
+
+  <div class="indicadores indicadores-3">
+    <div class="indicador"><span>Faturamento em {{ vendas.mes_rotulo }}</span><span class="indicador-valor">{{ vendas.total_mes|moeda }}</span></div>
+    <div class="indicador"><span>Atendimentos concluídos no mês</span><span class="indicador-valor">{{ vendas.qtd_mes }}</span></div>
+    <div class="indicador"><span>Ticket médio no mês</span><span class="indicador-valor">{{ vendas.ticket_medio|moeda if vendas.ticket_medio is not none else '—' }}</span></div>
+  </div>
+
+  <h3 class="titulo-grafico" id="titulo-grafico-dias">Faturamento por dia · últimos 7 dias</h3>
+  {% if vendas.total_periodo > 0 %}
+  <div class="grafico-colunas" role="group" aria-labelledby="titulo-grafico-dias">
+    <div class="grafico-area">
+      {% for marca in vendas.eixo %}
+      <div class="grafico-grade" style="bottom: {{ marca.posicao }}%"><span>{{ marca.valor|moeda_curta }}</span></div>
+      {% endfor %}
+      <div class="grafico-barras">
+        {% for d in vendas.dias %}
+        <div class="grafico-faixa" tabindex="0"
+             data-dica-valor="{{ d.valor|moeda }}"
+             data-dica-rotulo="{{ d.data|data }} · {{ d.qtd }} atendimento(s)"
+             aria-label="{{ d.data|data }}: {{ d.valor|moeda }}, {{ d.qtd }} atendimento(s)">
+          {% if d.destaque %}<span class="grafico-rotulo" style="bottom: {{ d.altura }}%">{{ d.valor|moeda_curta }}</span>{% endif %}
+          {% if d.valor > 0 %}<span class="grafico-coluna" style="height: {{ d.altura }}%"></span>{% endif %}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="grafico-eixo-x" aria-hidden="true">
+      {% for d in vendas.dias %}<span class="{{ 'hoje' if d.hoje }}">{{ d.rotulo.split(' ')[0] if not d.hoje else 'hoje' }}<br>{{ d.data.day }}</span>{% endfor %}
+    </div>
+  </div>
+  <details class="tabela-dados">
+    <summary>Ver os dados em tabela</summary>
+    <table class="tabela tabela-fixa">
+      <thead><tr><th>Dia</th><th>Atendimentos</th><th>Faturamento</th></tr></thead>
+      <tbody>
+        {% for d in vendas.dias %}<tr><td>{{ d.data|data }}</td><td>{{ d.qtd }}</td><td>{{ d.valor|moeda }}</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </details>
+  {% else %}
+  <p class="vazio">Nenhum atendimento concluído nos últimos 7 dias.</p>
+  {% endif %}
+
+  <h3 class="titulo-grafico">Serviços mais vendidos em {{ vendas.mes_rotulo }}</h3>
+  {% if vendas.servicos %}
+  <ul class="grafico-ranking">
+    {% for s in vendas.servicos %}
+    <li tabindex="0" data-dica-valor="{{ s.valor|moeda }}" data-dica-rotulo="{{ s.nome }} · {{ s.qtd }} atendimento(s)">
+      <span class="ranking-nome">{{ s.nome }}</span>
+      <span class="ranking-trilho"><span class="ranking-barra" style="width: {{ s.largura }}%"></span></span>
+      <span class="ranking-valor">{{ s.valor|moeda }}</span>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p class="vazio">Nenhum serviço concluído neste mês.</p>
   {% endif %}
 </section>
 

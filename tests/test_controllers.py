@@ -2,6 +2,8 @@
 from datetime import datetime, timedelta
 from io import BytesIO
 
+import pytest
+
 from agendafacil.models import Agendamento, Cliente, Feedback, Servico, Usuario
 from agendafacil.utils import agora
 
@@ -245,11 +247,62 @@ class TestAgendamentos:
         assert dados["fechado"] is False
         assert logado.get("/agendamentos/disponibilidade?data=x").status_code == 400
 
+    @pytest.mark.parametrize("agora_simulado,data_esperada", [
+        (datetime(2030, 1, 7, 9, 0), "2030-01-07"),    # segunda de manhã: hoje
+        (datetime(2030, 1, 7, 19, 55), "2030-01-08"),  # segunda após o último horário: terça (D8)
+        (datetime(2030, 1, 5, 19, 55), "2030-01-07"),  # sábado à noite: pula o domingo
+    ])
+    def test_novo_agendamento_abre_no_proximo_dia_com_horario(self, logado, base, monkeypatch,
+                                                                 agora_simulado, data_esperada):
+        import agendafacil.controllers.agendamentos as ctrl
+        import agendafacil.models.agendamento as modelo
+
+        monkeypatch.setattr(modelo, "agora", lambda: agora_simulado)
+        monkeypatch.setattr(ctrl, "hoje", lambda: agora_simulado.date())
+        pagina = logado.get("/agendamentos/novo").get_data(as_text=True)
+        assert f'name="data" type="date" value="{data_esperada}"' in pagina
+
+    def test_disponibilidade_devolve_horarios_com_motivo(self, logado, base, db):
+        criar_agendamento(db, base, datetime(2030, 1, 7, 10, 0))
+        url = (f"/agendamentos/disponibilidade?data={SEGUNDA}&profissional_id={base['ana'].id}"
+               f"&servico_id={base['servico'].id}")
+        horarios = {h["hora"]: h for h in logado.get(url).json["horarios"]}
+        assert horarios["10:30"]["livre"] is False
+        assert horarios["10:30"]["motivo"] == "Ana Souza ocupado(a) 10:00–11:00"
+        assert horarios["11:00"]["livre"] is True
+        assert logado.get("/agendamentos/disponibilidade").status_code == 400
+
+    def test_formulario_ja_vem_com_horarios_bloqueados_sem_javascript(self, logado, base, db):
+        criar_agendamento(db, base, datetime(2030, 1, 7, 10, 0))
+        outro = criar_agendamento(db, base, datetime(2030, 1, 7, 14, 0), cliente="outro_cliente")
+        pagina = logado.get(f"/agendamentos/{outro.id}/editar").get_data(as_text=True)
+        assert '<select id="hora"' in pagina
+        assert "indisponível: Ana Souza ocupado(a) 10:00–11:00" in pagina
+        assert 'value="14:00"' in pagina and "selected" in pagina.split('value="14:00"')[1][:120]
+
+    def test_remarcar_mantem_horario_fora_da_grade(self, logado, base, db):
+        a = criar_agendamento(db, base, datetime(2030, 1, 7, 8, 35))
+        pagina = logado.get(f"/agendamentos/{a.id}/editar").get_data(as_text=True)
+        assert 'value="08:35"' in pagina
+
     def test_dashboard_mostra_agenda_de_hoje(self, logado, base, db):
         criar_agendamento(db, base, agora() + timedelta(minutes=30))
         pagina = logado.get("/").get_data(as_text=True)
         assert "Mariana Alves" in pagina
         assert "R$ 80,00" in pagina
+
+
+    def test_painel_mostra_vendas_concluidas(self, logado, base, db):
+        criar_agendamento(db, base, agora() - timedelta(hours=3), status="concluido")
+        pagina = logado.get("/").get_data(as_text=True)
+        assert "Faturamento por dia" in pagina
+        assert pagina.count('class="grafico-faixa"') == 7
+        assert 'data-dica-valor="R$ 80,00"' in pagina
+        assert "Ver os dados em tabela" in pagina
+
+    def test_painel_sem_vendas_explica_o_que_fazer(self, logado, base):
+        pagina = logado.get("/").get_data(as_text=True)
+        assert "Nenhum atendimento concluído nos últimos 7 dias." in pagina
 
 
 # ------------------------------------------------------------------ laudos de teste (feedback)

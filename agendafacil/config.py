@@ -16,6 +16,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 HORA_ABERTURA = 8         # 08:00
 HORA_FECHAMENTO = 20      # 20:00 (o atendimento precisa terminar até este horário)
 DIAS_FECHADOS = {6}       # 6 = domingo (datetime.weekday())
+INTERVALO_HORARIOS_MIN = 10  # a lista de horários do agendamento anda de 10 em 10 minutos
 FUSO_HORARIO = "America/Sao_Paulo"
 ITENS_POR_PAGINA = 10
 TAMANHO_MAX_SCREENSHOT = 2 * 1024 * 1024  # 2 MB

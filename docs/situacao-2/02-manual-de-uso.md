@@ -13,7 +13,7 @@ Este manual é para quem usa o sistema no dia a dia: o dono do negócio e os ate
 
 | Item | Para que serve |
 |---|---|
-| **Início** | Painel do dia: atendimentos de hoje, quantos faltam, receita prevista, total de clientes e os próximos agendamentos. |
+| **Início** | Painel do dia: atendimentos de hoje, quantos faltam, receita prevista, total de clientes, **vendas** (faturamento e ticket médio do mês, gráfico dos últimos 7 dias, serviços mais vendidos) e os próximos agendamentos. |
 | **Agenda** | Lista de agendamentos com filtros. |
 | **Clientes** | Cadastro e busca de clientes. |
 | **Serviços** | Serviços oferecidos, com duração e preço. |
@@ -44,8 +44,9 @@ No celular, o menu fica no botão **Menu**, no canto superior direito.
 
 1. Clique em **+ Novo agendamento** (no painel, na agenda ou na ficha do cliente).
 2. Escolha **cliente**, **serviço** e **profissional**.
-3. Escolha a **data**. O quadro azul mostra os **horários já ocupados** daquele profissional no dia.
-4. Escolha o **horário de início**. O sistema mostra o **término previsto** com base na duração do serviço.
+3. Escolha a **data**. Ela já vem preenchida com o primeiro dia que ainda tem horário livre. O quadro azul mostra os **horários já ocupados** daquele profissional no dia.
+4. Escolha o **horário de início** na lista (de 10 em 10 minutos). Horários indisponíveis aparecem **bloqueados, com o motivo** (ex.: "indisponível: Ana Souza ocupado(a) 10:00–11:00"). O sistema mostra o **término previsto** com base na duração do serviço.
+   - Se você trocar o profissional, o serviço, o cliente ou a data e o horário escolhido deixar de valer, aparece o aviso "O horário … não está mais disponível".
 5. Clique em **Salvar agendamento**.
 
 O sistema **não deixa** agendar:
@@ -70,13 +71,20 @@ Quando isso acontece, aparece uma mensagem explicando o motivo, e o que você j�
 
 Atendimentos **concluídos** não podem mais ser alterados.
 
-## 2.7 Laudos de teste (Situação-Problema 3)
+## 2.7 Vendas (painel Início)
+
+- Só entram atendimentos **concluídos**: use **Concluir** na agenda depois de atender.
+- **Faturamento**, **atendimentos concluídos** e **ticket médio** do mês atual.
+- **Gráfico de faturamento por dia** dos últimos 7 dias. Passe o mouse (ou use Tab) sobre uma coluna para ver o valor e a quantidade de atendimentos. "Ver os dados em tabela" mostra os mesmos números.
+- **Serviços mais vendidos** do mês (até 5), com o valor total de cada um.
+
+## 2.8 Laudos de teste (Situação-Problema 3)
 
 - O formulário fica em **/feedback** (link "Testou o sistema? Envie seu laudo" no rodapé de todas as páginas). Não precisa de login.
 - O testador informa nome, data do teste, o que funcionou, o que não funcionou, o que não testou, sugestões, uma nota de facilidade de uso (1 a 5) e, se quiser, uma **captura da tela** com o erro (até 2 MB).
 - O administrador vê tudo em **Laudos**, abre as capturas e pode **Exportar CSV** (abre no Excel) para montar o documento de entrega.
 
-## 2.8 Dúvidas frequentes
+## 2.9 Dúvidas frequentes
 
 | Pergunta | Resposta |
 |---|---|
@@ -84,3 +92,5 @@ Atendimentos **concluídos** não podem mais ser alterados.
 | Apareceu "Sua sessão expirou ou o formulário é inválido". | A página ficou aberta muito tempo ou o login mudou. Recarregue a página e repita a ação. |
 | Por que não consigo excluir um serviço? | Porque ele já foi usado em agendamentos. Use **Desativar**. |
 | Cancelei sem querer. | Use **Reabrir** na agenda. |
+| Não consigo escolher 15:34. | Os horários andam de 10 em 10 minutos (15:30, 15:40…), conforme sugerido no teste de aceitação. |
+| O gráfico de vendas está vazio. | Ele considera só atendimentos **concluídos** nos últimos 7 dias. |

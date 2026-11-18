@@ -15,11 +15,12 @@ Arquivos de teste: `tests/test_models.py` (unidade), `tests/test_controllers.py`
 | RF05 | Criar agendamento (cliente + serviço + profissional + data e hora) | `controllers/agendamentos.py`, `models/agendamento.py` | `TestAgendamento`, `test_criar_e_listar_no_dia` |
 | RF06 | Consultar a agenda filtrando por dia, profissional, status e período | `agendamentos.lista` | `test_filtros_da_agenda`, `test_passados_so_aparecem_com_periodo_todos` |
 | RF07 | Remarcar, concluir, cancelar e reabrir agendamento | `agendamentos.editar`, `agendamentos.alterar_status` | `TestStatusAgendamento`, `test_remarcar`, `test_cancelar_reabrir_e_concluir` |
-| RF08 | Mostrar os horários ocupados do profissional no dia escolhido | `agendamentos.disponibilidade`, `static/js/agendamento.js` | `test_disponibilidade_json`, E2E passo 5 |
+| RF08 | Oferecer os horários do dia de 10 em 10 min, bloqueando os indisponíveis com o motivo antes de salvar, e mostrar a ocupação do profissional | `Agendamento.horarios_do_dia`, `agendamentos.disponibilidade`, `static/js/agendamento.js` | `TestHorariosDoDia`, `test_disponibilidade_json`, `test_disponibilidade_devolve_horarios_com_motivo`, E2E passos 4 e 5 |
 | RF09 | Painel do dia: atendimentos, pendentes, receita prevista, clientes | `controllers/dashboard.py` | `test_dashboard_mostra_agenda_de_hoje` |
 | RF10 | Formulário público de laudo de teste, com captura de tela | `controllers/feedback.py`, `models/feedback.py` | `TestFeedback` (dois arquivos) |
 | RF11 | Listar, ver captura, exportar CSV e excluir laudos (admin) | `feedback.lista`, `feedback.exportar` | `test_admin_lista_ve_print_e_exporta_csv` |
 | RF12 | Carregar dados de exemplo para testes rápidos | `seed.py`, `dashboard.dados_exemplo` | `test_dados_de_exemplo` |
+| RF13 | Indicadores de vendas: faturamento, atendimentos e ticket médio do mês; gráfico de faturamento dos últimos 7 dias; serviços mais vendidos (somente concluídos). Pedido da testadora Vitória | `models/vendas.py`, `views/dashboard.html` | `TestResumoVendas`, `test_painel_mostra_vendas_concluidas`, `test_painel_de_vendas` (E2E) |
 
 ## 2.2 Regras de negócio (RN)
 
@@ -38,6 +39,7 @@ Arquivos de teste: `tests/test_models.py` (unidade), `tests/test_controllers.py`
 | RN11 | Serviço ou profissional inativo não aparece para novos agendamentos | `_opcoes`, `Agendamento.definir` | `test_servico_desativado_nao_pode_ser_escolhido`, `test_desativar_e_reativar_servico` |
 | RN12 | A primeira conta é administradora; somente o administrador vê os laudos | `auth.cadastro`, `admin_obrigatorio` | `test_primeiro_cadastro_vira_admin_e_os_demais_atendentes`, `test_somente_admin_ve_laudos` |
 | RN13 | O cadastro de novas contas pode ser fechado (`CADASTRO_ABERTO=0`) depois do período de testes | `auth.cadastro` | `test_cadastro_fechado_bloqueia_novas_contas` |
+| RN15 | A data padrão de um novo agendamento é o primeiro dia com horário livre (D8) | `agendamentos._primeira_data_com_horario` | `test_novo_agendamento_abre_no_proximo_dia_com_horario` |
 | RN14 | Telefone com DDD (10 ou 11 dígitos); nome de serviço único (sem diferenciar maiúsculas); duração de 5 a 480 min; preço ≥ 0 | `preencher()` dos models + `CHECK` no banco | `TestCliente`, `TestServico` |
 
 ## 2.3 Requisitos não funcionais (RNF)
@@ -51,6 +53,6 @@ Arquivos de teste: `tests/test_models.py` (unidade), `tests/test_controllers.py`
 | RNF05 | Segurança | Senhas guardadas como *hash*; proteção contra CSRF; cookie `HttpOnly`/`SameSite`/`Secure`; sem *open redirect*; cabeçalhos `X-Frame-Options` e `nosniff`; upload validado pela assinatura do arquivo | `utils.py`, `__init__.py`, `models/feedback.py`; testes em `TestAutenticacao` e `test_utils.py` |
 | RNF06 | Integridade | Regras validadas no servidor **e** garantidas no banco (`NOT NULL`, `UNIQUE`, `CHECK`, `FOREIGN KEY`) | [05-banco-de-dados.md](05-banco-de-dados.md) |
 | RNF07 | Desempenho | Consultas de agenda usam índice (`profissional_id, inicio`); listas paginadas (10 por página) | `schema.sql` |
-| RNF08 | Manutenibilidade | Arquitetura MVC; cobertura de testes automatizados ≥ 90% | 125 testes, 94% de cobertura |
+| RNF08 | Manutenibilidade | Arquitetura MVC; cobertura de testes automatizados ≥ 90% | 149 testes, 94% de cobertura |
 | RNF09 | Disponibilidade | Hospedado no Render com banco gerenciado (Neon); rota `/saude` para checar aplicação e banco | `dashboard.saude` |
 | RNF10 | Robustez | Nenhum erro técnico aparece para o usuário; páginas amigáveis para 400, 403, 404, 413 e 500 | `_registrar_erros` em `__init__.py` |

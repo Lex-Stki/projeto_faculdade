@@ -1,5 +1,5 @@
 """Testes de unidade da camada Model (regras de negócio e validações)."""
-from datetime import datetime
+from datetime import date, datetime
 from decimal import Decimal
 from io import BytesIO
 
@@ -247,3 +247,101 @@ class TestFeedback:
     ])
     def test_detectar_imagem(self, conteudo, mime):
         assert detectar_imagem(conteudo) == mime
+
+
+# ------------------------------------------------------------------ horários do dia (defeito D7)
+class TestHorariosDoDia:
+    def horarios(self, base, **kw):
+        kw.setdefault("referencia", REFERENCIA)
+        return {h["hora"]: h for h in Agendamento.horarios_do_dia(date(2030, 1, 7), **kw)}
+
+    def test_grade_de_10_em_10_minutos_respeitando_a_duracao(self, db, base):
+        h = self.horarios(base, duracao_min=60)
+        assert list(h)[:3] == ["08:00", "08:10", "08:20"]
+        assert "19:00" in h and "19:10" not in h       # precisa terminar até 20:00 (RN02)
+        assert "15:34" not in h                         # o caso relatado pelo testador Robson
+        assert all(item["livre"] for item in h.values())
+
+    def test_sem_servico_usa_o_intervalo_minimo(self, db, base):
+        assert list(self.horarios(base))[-1] == "19:50"
+
+    def test_domingo_nao_tem_horarios(self, db, base):
+        assert Agendamento.horarios_do_dia(date(2030, 1, 6), referencia=REFERENCIA) == []
+
+    def test_horarios_passados_ficam_bloqueados(self, db, base):
+        h = self.horarios(base, referencia=datetime(2030, 1, 7, 9, 5))
+        assert h["09:00"]["motivo"] == "horário já passou"
+        assert h["09:10"]["livre"]
+
+    def test_bloqueia_com_motivo_os_horarios_do_profissional(self, db, base):
+        criar_agendamento(db, base, datetime(2030, 1, 7, 10, 0))
+        h = self.horarios(base, duracao_min=60, profissional_id=base["ana"].id)
+        assert h["09:00"]["livre"]                      # 09:00–10:00 encosta, não conflita
+        assert h["09:10"]["motivo"] == "Ana Souza ocupado(a) 10:00–11:00"
+        assert h["10:50"]["motivo"] == "Ana Souza ocupado(a) 10:00–11:00"
+        assert h["11:00"]["livre"]
+
+    def test_bloqueia_horarios_em_que_o_cliente_ja_esta_agendado(self, db, base):
+        criar_agendamento(db, base, datetime(2030, 1, 7, 10, 0))
+        h = self.horarios(base, duracao_min=60, profissional_id=base["bruno"].id,
+                          cliente_id=base["cliente"].id)
+        assert h["10:30"]["motivo"] == "cliente já agendado(a) 10:00–11:00"
+
+    def test_ignora_o_proprio_agendamento_ao_remarcar(self, db, base):
+        a = criar_agendamento(db, base, datetime(2030, 1, 7, 10, 0))
+        h = self.horarios(base, duracao_min=60, profissional_id=base["ana"].id, ignorar_id=a.id)
+        assert h["10:00"]["livre"]
+
+    def test_mesma_regra_que_o_salvamento(self, db, base):
+        """Todo horário oferecido como livre precisa ser aceito por definir() (e vice-versa)."""
+        criar_agendamento(db, base, datetime(2030, 1, 7, 10, 0))
+        for hora, item in self.horarios(base, duracao_min=60, profissional_id=base["ana"].id,
+                                         cliente_id=base["outro_cliente"].id).items():
+            erros = Agendamento().definir(form_agendamento(base, hora=hora, cliente="outro_cliente"),
+                                          referencia=REFERENCIA)
+            assert (erros == []) == item["livre"], hora
+
+
+# ------------------------------------------------------------------ indicadores de vendas (sugestão da Vitória)
+class TestResumoVendas:
+    def test_soma_apenas_concluidos_e_calcula_ticket(self, db, base):
+        from agendafacil.models.vendas import resumo_vendas
+
+        criar_agendamento(db, base, datetime(2030, 1, 7, 10, 0), status="concluido")
+        criar_agendamento(db, base, datetime(2030, 1, 8, 10, 0), status="concluido")
+        criar_agendamento(db, base, datetime(2030, 1, 8, 14, 0), status="cancelado")
+        criar_agendamento(db, base, datetime(2030, 1, 9, 10, 0), status="agendado")
+        r = resumo_vendas(date(2030, 1, 9))
+        assert r["total_mes"] == Decimal("160.00")
+        assert r["qtd_mes"] == 2
+        assert r["ticket_medio"] == Decimal("80.00")
+        dias = {d["data"]: d for d in r["dias"]}
+        assert len(r["dias"]) == 7 and r["dias"][-1]["hoje"]
+        assert dias[date(2030, 1, 8)]["valor"] == Decimal("80.00")   # o cancelado não entra
+        assert dias[date(2030, 1, 9)]["valor"] == 0                  # o agendado não entra
+        assert r["servicos"] == [{"nome": "Corte", "valor": Decimal("160.00"), "qtd": 2, "largura": 100.0}]
+
+    def test_mes_e_grafico_tem_periodos_diferentes(self, db, base):
+        from agendafacil.models.vendas import resumo_vendas
+
+        criar_agendamento(db, base, datetime(2030, 1, 31, 10, 0), status="concluido")
+        r = resumo_vendas(date(2030, 2, 2))
+        assert r["total_mes"] == 0                       # 31/01 é do mês anterior...
+        assert r["total_periodo"] == Decimal("80.00")    # ...mas está nos últimos 7 dias
+
+    def test_sem_vendas(self, db, base):
+        from agendafacil.models.vendas import resumo_vendas
+
+        r = resumo_vendas(date(2030, 1, 9))
+        assert r["ticket_medio"] is None and r["servicos"] == [] and r["total_periodo"] == 0
+
+    @pytest.mark.parametrize("maximo,eixo", [
+        (Decimal("80"), [0, 50, 100]),
+        (Decimal("450"), [0, 200, 400, 600]),
+        (Decimal("1000"), [0, 500, 1000]),
+        (Decimal("0"), [0]),
+    ])
+    def test_eixo_com_numeros_redondos(self, maximo, eixo):
+        from agendafacil.models.vendas import _eixo
+
+        assert _eixo(maximo) == eixo

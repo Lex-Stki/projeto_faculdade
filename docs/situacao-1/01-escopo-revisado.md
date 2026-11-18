@@ -10,6 +10,7 @@
 | 2.0 | PIT II, Situação 1 | Escopo fechado para execução (seção 1.5). Regras de negócio numeradas e ligadas aos testes. UML revisada, com estados e sequência. IHC revisada (mensagens de erro, mapa de navegação). Modelos conceitual, lógico normalizado e físico. Dicionário de dados. |
 | 2.1 | PIT II, Situação 2 | Arquitetura MVC implementada, manual de uso e de implantação, testes automatizados. |
 | 2.2 | PIT II, Situação 3 | Plano de testes, formulário de laudo, laudo de qualidade com defeitos e correções. |
+| 2.3 | PIT II, Situação 3 (após os testes dos colegas) | Lista de horários com indisponibilidade antes de salvar (D7 e sugestões de Bruno e Vitória), melhorias no celular, indicadores de vendas com gráficos (RF13), data padrão inteligente (D8). |
 
 ## 1.2 Problema
 
@@ -45,14 +46,14 @@ Construir o **AgendaFácil**, uma aplicação web responsiva que funcione no com
 5. **Agendamento** com cálculo automático do horário de término e bloqueio de: horário passado, domingo, fora do expediente e conflito de profissional ou de cliente.
 6. **Agenda** com filtros por dia, profissional, status e período.
 7. **Remarcar, concluir, cancelar e reabrir** um agendamento. O cancelamento é reversível.
-8. **Consulta de disponibilidade** em tempo real no formulário: horários já ocupados do profissional no dia.
-9. **Painel do dia** com atendimentos, pendentes, receita prevista e total de clientes.
+8. **Consulta de disponibilidade** em tempo real no formulário: lista de horários de 10 em 10 min com os indisponíveis bloqueados e o motivo, e a ocupação do profissional no dia.
+9. **Painel do dia** com atendimentos, pendentes, receita prevista e total de clientes, e **indicadores de vendas** com gráficos (faturamento dos últimos 7 dias, ticket médio, serviços mais vendidos).
 10. **Formulário de laudo de teste** público, com envio de captura de tela, e lista e exportação em CSV para o administrador.
 
 ### Fora do escopo (próximas versões)
 
 - Agendamento feito pelo próprio cliente final (página pública de reservas);
-- Lembretes automáticos por WhatsApp ou e-mail;
+- Lembretes automáticos por WhatsApp ou e-mail (sugerido no teste de aceitação; exige a API paga do WhatsApp Business);
 - Vários estabelecimentos na mesma instalação (*multi-tenant*);
 - Horário de funcionamento diferente por profissional, folgas e feriados;
 - Recuperação de senha por e-mail;

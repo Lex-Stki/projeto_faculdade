@@ -72,6 +72,17 @@ def formatar_moeda(valor) -> str:
     return "R$ " + texto.replace(",", "X").replace(".", ",").replace("X", ".")
 
 
+def formatar_moeda_curta(valor) -> str:
+    """Para eixos de gráfico: sem centavos; compacto a partir de 10 mil (R$ 12 mil)."""
+    if valor is None:
+        return ""
+    valor = float(valor)
+    if valor >= 10_000:
+        texto = f"{valor / 1000:,.1f}".rstrip("0").rstrip(".")
+        return "R$ " + texto.replace(",", "X").replace(".", ",").replace("X", ".") + " mil"
+    return "R$ " + f"{valor:,.0f}".replace(",", ".")
+
+
 def formatar_data(valor) -> str:
     return valor.strftime("%d/%m/%Y") if valor else ""
 

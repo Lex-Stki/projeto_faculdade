@@ -89,6 +89,7 @@ def _registrar_hooks(app: Flask) -> None:
 def _registrar_filtros(app: Flask) -> None:
     app.add_template_filter(utils.formatar_telefone, "telefone")
     app.add_template_filter(utils.formatar_moeda, "moeda")
+    app.add_template_filter(utils.formatar_moeda_curta, "moeda_curta")
     app.add_template_filter(utils.formatar_data, "data")
     app.add_template_filter(utils.formatar_data_hora, "data_hora")
     app.add_template_filter(utils.formatar_hora, "hora")

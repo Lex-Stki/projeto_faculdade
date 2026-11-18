@@ -3,22 +3,23 @@
 | Item | Valor |
 |---|---|
 | Sistema | AgendaFácil: agendamento para negócios de serviços |
-| Versão avaliada | 2.2 (branch `main`) |
+| Versão avaliada | 2.3 (branch `main`), após as correções dos testes de aceitação |
 | Ambiente de verificação | Windows 11, Python 3.13, SQLite em memória (testes), Microsoft Edge (E2E) |
 | Ambiente de produção | Render (Python 3.12, gunicorn) + PostgreSQL (Neon) |
 | Data da verificação interna | 17/11/2026 |
+| Testes de aceitação (colegas) | 17/11/2026, 5 testadores |
 
 ## 3.1 Resumo
 
 | Indicador | Resultado |
 |---|---|
-| Testes automatizados | **125 aprovados / 0 falhas** (83 unidade, 40 integração, 2 cenários E2E) |
+| Testes automatizados | **149 aprovados / 0 falhas** (98 unidade, 48 integração, 3 cenários E2E) |
 | Cobertura de código | **94 %** |
-| Defeitos encontrados na verificação interna e no deploy | 6 (2 altas, 2 médias, 2 baixas) |
-| Defeitos corrigidos | 6 de 6, cada um com teste de regressão |
+| Defeitos encontrados (verificação interna, deploy e colegas) | 8 (2 altas, 3 médias, 3 baixas) |
+| Defeitos corrigidos | 8 de 8, cada um com teste de regressão |
 | Erros de JavaScript no navegador durante o E2E | 0 |
 | Validação em produção | **OK**: `https://agendafacil-scyw.onrender.com/saude` responde `banco: ok`; agendamento criado e listado no PostgreSQL (Neon), evidência `11-producao-agendamento-criado.png` |
-| Testes de aceitação (colegas) | **Pendente**: ver seção 3.4 |
+| Resultado dos testes de aceitação | **Concluídos**: 5 testadores, nota média de facilidade **4,6 / 5**; 1 defeito e 4 sugestões, das quais 3 implementadas (seção 3.4) |
 
 ## 3.2 Defeitos encontrados na verificação interna e correções
 
@@ -86,6 +87,27 @@
 
 Na primeira execução da suíte houve também uma falha em `test_desativar_e_reativar_servico` que **era erro do próprio teste**: ele procurava a palavra "Corte" na página, mas ela aparecia na mensagem "Serviço “Corte” desativado". O teste foi ajustado para procurar o texto da opção do formulário. Não houve mudança no sistema.
 
+### D7: Seletor de hora aceitava minutos que depois eram recusados (média), relatado pelo testador Robson
+
+| | |
+|---|---|
+| **Como foi encontrado** | Teste de aceitação. Laudo do Robson: *"Não é possível agendar em horários que não sejam hora + 10, 20, 30, 40 e 50 min, exemplo, não pode agendar às 15:34, apenas 15:30"*; *"Interface de escolha de hora confusa e difícil de usar"*. |
+| **Causa** | O campo era um `<input type="time" step="300">` (intervalos de 5 min). O seletor do navegador oferece todos os minutos de 00 a 59; ao escolher 15:34, a validação do navegador recusava com a mensagem genérica "Valor inválido.". A interface permitia o erro e depois punia o usuário sem explicar o motivo. |
+| **Correção** | O horário virou uma **lista de horários de 10 em 10 minutos** (sugestão do próprio testador), calculada pelo novo `Agendamento.horarios_do_dia()` com as mesmas regras do salvamento. Horários passados ou em conflito aparecem **bloqueados, com o motivo** (ex.: "indisponível: Ana Souza ocupado(a) 10:00–11:00"). A lista é atualizada ao mudar data, serviço, profissional ou cliente. A mensagem genérica também foi trocada por textos específicos ("Valor fora dos intervalos aceitos…"). |
+| **Testes de regressão** | `TestHorariosDoDia` (8 testes, entre eles `test_mesma_regra_que_o_salvamento`, que garante que todo horário oferecido como livre é aceito ao salvar e vice-versa), `test_disponibilidade_devolve_horarios_com_motivo`, `test_formulario_ja_vem_com_horarios_bloqueados_sem_javascript`, `test_remarcar_mantem_horario_fora_da_grade`, E2E passos 4 e 5 |
+| **Status** | Corrigido |
+
+![Lista de horários com indisponibilidade antes de salvar](evidencias/06-indisponibilidade-antes-de-salvar.png)
+
+### D8: Depois do expediente, "Novo agendamento" abria no dia de hoje sem nenhum horário (baixa)
+
+| | |
+|---|---|
+| **Como foi encontrado** | Reteste após a correção do D7 (verificação). A captura do formulário no celular, feita às 20h50, mostrou "Nenhum horário livre neste dia" e a orientação errada "Escolha o profissional…". |
+| **Correção** | A data padrão passa a ser o próximo dia que ainda tem horário livre (pulando o domingo). Quando não há horários na data escolhida, o painel diz "Não há mais horários disponíveis nesta data. Escolha outra data.". |
+| **Teste de regressão** | `test_novo_agendamento_abre_no_proximo_dia_com_horario` (manhã de segunda, segunda à noite, sábado à noite) |
+| **Status** | Corrigido |
+
 ## 3.3 Limitações conhecidas (riscos aceitos nesta versão)
 
 | # | Limitação | Risco | Tratamento |
@@ -98,23 +120,29 @@ Na primeira execução da suíte houve também uma falha em `test_desativar_e_re
 
 ## 3.4 Resultados dos testes de aceitação (colegas)
 
-*Preencher após receber os laudos (menu **Laudos** → Exportar CSV).*
+Os 5 laudos foram enviados pelo formulário do sistema (`/feedback`) em 17/11/2026 e exportados em CSV. Nenhum testador anexou captura de tela. Os nomes estão abreviados neste repositório público; o documento de entrega traz os nomes completos.
 
-| # | Testador | Data | Problemas relatados | Severidade | Ação tomada | Status |
+| # | Testador | Data | O que testou e funcionou | Problemas relatados | Não testado | Nota |
 |---|---|---|---|---|---|---|
-| 1 | | | | | | |
-| 2 | | | | | | |
-| 3 | | | | | | |
-| 4 | | | | | | |
-| 5 | | | | | | |
+| 1 | Rafael F. | 17/11/2026 | Criação de agendamentos; conflito de horário entre profissionais e clientes bloqueado corretamente | Nenhum | Cadastro de profissionais, clientes e serviços | 5 |
+| 2 | Fernando C. | 17/11/2026 | Agenda, clientes e serviços | Nenhum | — | 5 |
+| 3 | Robson I. | 17/11/2026 | Escolha de profissional e de serviço | Só aceita minutos "redondos" (não aceita 15:34); escolha de hora confusa; interface ruim no celular | Envio de pré-agendamento por WhatsApp (não existe no sistema) | 3 |
+| 4 | Bruno V. | 17/11/2026 | Cadastro de cliente, agendamento, serviços e profissionais | Nenhum | — | 5 |
+| 5 | Vitória S. | 17/11/2026 | Todas as funcionalidades disponíveis | Nenhum | Indicadores de vendas com gráficos (não existiam) | 5 |
 
-**Sugestões recebidas e decisão:**
+**Nota média de facilidade de uso: 4,6 / 5** (critério de aceitação: ≥ 4, atendido). A única nota abaixo de 4 veio do relato que originou o D7.
 
-| Sugestão | Aceita? | Justificativa |
-|---|---|---|
-| | | |
+### Itens relatados, classificação e ação tomada
 
-**Nota média de facilidade de uso:** ___ / 5
+| Item | Quem | Classificação | Ação | Status |
+|---|---|---|---|---|
+| Minutos fora de 10/20/30… recusados; escolha de hora confusa | Robson | Defeito, média (D7) | Lista de horários de 10 em 10 min com indisponibilidade e motivo | Corrigido |
+| Interface ruim no celular | Robson | Usabilidade | Lista de horários nativa (fácil de usar no toque); botões principais com largura total e altura mínima de 44 px; filtros um por linha; margens menores | Melhorado (evidências 14 e 15) |
+| Mostrar a validação ao escolher a data, sem precisar salvar | Bruno | Sugestão | Aceita: horários indisponíveis bloqueados com o motivo e aviso imediato quando o horário escolhido deixa de valer | Implementada |
+| Mostrar "indisponível e o motivo" antes de clicar em agendar | Vitória | Sugestão | Aceita: mesma implementação acima | Implementada |
+| Indicadores de vendas no dia, com gráficos | Vitória | Sugestão (nova funcionalidade) | Aceita: seção **Vendas** no painel com faturamento, atendimentos e ticket médio do mês, gráfico de faturamento dos últimos 7 dias e ranking dos serviços mais vendidos, com dicas no mouse ou teclado, tabela com os dados e modo escuro | Implementada (RF13) |
+| Lembrete por WhatsApp 1 h antes do atendimento | Robson | Sugestão | **Não implementada nesta versão.** Exige a API oficial do WhatsApp Business (conta empresarial verificada, aprovação de modelos de mensagem e custo por conversa) e um agendador de tarefas fora do plano gratuito de hospedagem. Já estava listada como "fora do escopo" e fica registrada para a próxima versão. | Fora do escopo |
+| Não testou cadastros de profissionais, clientes e serviços | Rafael | Cobertura do teste | Essas funções foram cobertas pelos laudos do Fernando e do Bruno e pelos testes automatizados (`TestClientes`, `TestServicosEProfissionais`) | Sem ação |
 
 ## 3.5 Evidências
 
@@ -127,10 +155,14 @@ Todas as capturas em [`evidencias/`](evidencias/) foram geradas automaticamente 
 | `03-validacao-formulario.png` | Validação no navegador após a correção do D1 |
 | `04-formulario-agendamento.png` | Término previsto e disponibilidade em tempo real (RN06, RF08) |
 | `05-agenda-do-dia.png` | Agendamento criado e mensagem de sucesso |
-| `06-conflito-de-horario.png` | Bloqueio de conflito com mensagem explicativa (RN03) |
+| `06-indisponibilidade-antes-de-salvar.png` | Horários em conflito bloqueados com o motivo e aviso imediato, antes de salvar (D7; sugestões de Bruno e Vitória) |
 | `07-dialogo-confirmacao.png` | Confirmação antes de cancelar (RNF02) |
 | `08-agenda-no-celular.png` | Layout responsivo (RNF03) |
 | `09-laudos-recebidos.png` | Laudo de teste recebido (RF10/RF11) |
 | `10-erro-404.png` | Página de erro amigável (RNF10) |
 | `D1-antes-da-correcao.png` | Defeito D1 no momento em que foi detectado |
 | `11-producao-agendamento-criado.png` | Sistema em produção (Render + Neon): agendamento criado e listado, data em formato brasileiro, modo escuro |
+| `12-painel-vendas.png` | Indicadores e gráficos de vendas (sugestão da Vitória) |
+| `13-painel-vendas-escuro.png` | O mesmo painel no modo escuro (cores validadas para a superfície escura) |
+| `14-painel-vendas-celular.png` | Painel de vendas no celular |
+| `15-agendamento-no-celular.png` | Formulário de agendamento no celular após as melhorias (relato do Robson) e a correção do D8 |

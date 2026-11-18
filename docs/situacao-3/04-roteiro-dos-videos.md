@@ -18,18 +18,22 @@ Dica: grave a tela com o **Xbox Game Bar** (Win + G) ou o **OBS Studio**, publiq
 | 1:30–2:30 | VS Code: pastas `models/`, `controllers/`, `views/` | Arquitetura MVC: o Model guarda as regras (abrir `Agendamento.definir`), o Controller recebe a requisição, a View mostra o HTML. Python + Flask, PostgreSQL no Neon, hospedado no Render. |
 | 2:30–3:00 | Site no ar: criar conta | Primeira conta vira administradora; carregar dados de exemplo. |
 | 3:00–3:30 | Clientes | Cadastro com máscara de telefone, validação de campo obrigatório, busca, "Salvar e agendar". |
-| 3:30–4:30 | Novo agendamento | Término previsto, horários ocupados. Tentar um **conflito**, **domingo** e **19:30** e ler as mensagens. Salvar um válido. |
+| 3:30–4:30 | Novo agendamento | Lista de horários de 10 em 10 min; horários **ocupados bloqueados com o motivo**; término previsto; escolher **domingo** (fechado) e notar que um serviço de 60 min não oferece 19:30. Salvar um válido. |
 | 4:30–5:15 | Agenda | Filtros; Remarcar; Cancelar (diálogo) e Reabrir; tentar concluir um atendimento futuro. |
 | 5:15–5:45 | Serviços | Desativar um serviço e mostrar que ele some do agendamento; tentar excluir um serviço já usado. |
 | 5:45–6:15 | Celular (F12 → modo dispositivo) | Layout responsivo. |
-| 6:15–7:00 | Terminal: `pytest --cov=agendafacil` | 125 testes passando e 94% de cobertura; mostrar um teste de regra de negócio e o teste E2E. |
-| 7:00–7:30 | Formulário `/feedback` | Como os colegas vão testar e enviar o laudo com captura de tela. Encerramento. |
+| 6:15–6:50 | Terminal: `pytest --cov=agendafacil` | 149 testes passando e 94% de cobertura; mostrar um teste de regra de negócio e o teste E2E. |
+| 6:50–7:10 | Painel **Vendas** | Faturamento, ticket médio, gráfico dos últimos 7 dias e serviços mais vendidos. |
+| 7:10–7:30 | Formulário `/feedback` | Como os colegas vão testar e enviar o laudo com captura de tela. Encerramento. |
 
 ## Vídeo 2: Solução atualizada (≤ 5 min)
 
 | Tempo | Mostrar | O que falar |
 |---|---|---|
-| 0:00–0:30 | Menu **Laudos** | Quantos colegas testaram, nota média e principais pontos. |
-| 0:30–3:30 | Para cada defeito ou sugestão aceita: o laudo (com a captura) → o *commit* no GitHub → o sistema corrigido | "O Fulano relatou X. A causa era Y. Corrigi assim, e este teste garante que não volta." |
-| 3:30–4:15 | Laudo de qualidade (`docs/situacao-3/03-laudo-de-qualidade.md`) | Defeitos da verificação interna (D1–D5), limitações conhecidas e o que ficou para a próxima versão (com justificativa). |
-| 4:15–5:00 | Terminal: `pytest` | Todos os testes passando depois das correções. Encerramento. |
+| 0:00–0:30 | Menu **Laudos** no site | 5 colegas testaram em 17/11; nota média 4,6/5; 1 defeito e 4 sugestões. |
+| 0:30–1:45 | Laudo do Robson → formulário de agendamento | "O Robson não conseguia agendar às 15:34 e achou a escolha de hora confusa. O campo aceitava qualquer minuto e depois recusava com 'Valor inválido'. Troquei por uma lista de 10 em 10 minutos, como ele sugeriu." Abrir a lista e mostrar. |
+| 1:45–2:45 | Mesmo formulário: trocar o profissional para um que está ocupado | "Bruno e Vitória pediram ver a indisponibilidade antes de salvar. Agora os horários ocupados ficam bloqueados com o motivo e aparece um aviso se o horário escolhido deixa de valer." |
+| 2:45–3:45 | Painel **Início → Vendas** (passar o mouse no gráfico; abrir "Ver os dados em tabela") | "A Vitória sentiu falta de indicadores de vendas com gráficos. Criei faturamento, ticket médio, gráfico dos últimos 7 dias e serviços mais vendidos." |
+| 3:45–4:15 | Celular (F12 → modo dispositivo) | Melhorias para o celular pedidas pelo Robson: botões maiores, lista de horários nativa. |
+| 4:15–4:40 | Laudo de qualidade (seção 3.4) | Sugestão de WhatsApp registrada como fora do escopo, com a justificativa. Defeito D8 encontrado no reteste. |
+| 4:40–5:00 | Terminal: `pytest` | 149 testes passando depois das correções. Encerramento. |
