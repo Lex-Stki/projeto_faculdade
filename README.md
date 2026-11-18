@@ -6,7 +6,7 @@ O sistema organiza clientes, serviços, profissionais e a agenda e **impede auto
 
 | | |
 |---|---|
-| **Sistema no ar** | https://agendafacil-scyw.onrender.com |
+| **Sistema no ar** | https://agendafacil-scyw.onrender.com (hospedagem gratuita: se estiver parado, a primeira abertura leva cerca de 50 s) |
 | **Formulário de teste** | https://agendafacil-scyw.onrender.com/feedback |
 | **Vídeo de apresentação** | https://youtu.be/A9zJHQCI-Eg |
 | **Vídeo da versão atualizada** | https://youtu.be/GA2l0FCQYZo |
