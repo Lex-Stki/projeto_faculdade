@@ -8,8 +8,8 @@ O sistema organiza clientes, serviços, profissionais e a agenda e **impede auto
 |---|---|
 | **Sistema no ar** | https://agendafacil-scyw.onrender.com |
 | **Formulário de teste** | https://agendafacil-scyw.onrender.com/feedback |
-| **Vídeo de apresentação** | *(link do YouTube)* |
-| **Vídeo da versão atualizada** | *(link do YouTube)* |
+| **Vídeo de apresentação** | https://youtu.be/A9zJHQCI-Eg |
+| **Vídeo da versão atualizada** | https://youtu.be/GA2l0FCQYZo |
 
 ![Agenda do dia](docs/situacao-3/evidencias/05-agenda-do-dia.png)
 
